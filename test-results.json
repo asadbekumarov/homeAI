@@ -1,0 +1,90 @@
+{
+  "scrollCurrentTimes": {
+    "0%": {
+      "currentTime": 0,
+      "expectedTime": 0,
+      "diff": 0,
+      "hudProgress": "00%",
+      "passed": true
+    },
+    "25%": {
+      "currentTime": 1.980629,
+      "expectedTime": 2.2415,
+      "diff": 0.26087099999999985,
+      "hudProgress": "25%",
+      "passed": true
+    },
+    "50%": {
+      "currentTime": 3.970628,
+      "expectedTime": 4.483,
+      "diff": 0.5123719999999996,
+      "hudProgress": "50%",
+      "passed": true
+    },
+    "75%": {
+      "currentTime": 5.966525,
+      "expectedTime": 6.724499999999999,
+      "diff": 0.7579749999999992,
+      "hudProgress": "75%",
+      "passed": true
+    },
+    "100%": {
+      "currentTime": 7.94857,
+      "expectedTime": 8.966,
+      "diff": 1.0174299999999992,
+      "hudProgress": "100%",
+      "passed": true
+    }
+  },
+  "scrollBack": {
+    "currentTime": 2.005503,
+    "passed": true
+  },
+  "fastScroll": {
+    "currentTime": 7.154195,
+    "seeking": false,
+    "passed": true
+  },
+  "refreshMidScroll": {
+    "scrollY": 2700,
+    "currentTime": 3.975328,
+    "passed": true
+  },
+  "ctaSubmission": {
+    "dialogOpened": true,
+    "submittedSuccess": true,
+    "dialogClosedOnEsc": true
+  },
+  "reducedMotion": {
+    "textVisible": true,
+    "playerWithControls": true,
+    "passed": true
+  },
+  "horizontalOverflow": {
+    "375": {
+      "scrollWidth": 375,
+      "innerWidth": 375,
+      "noOverflow": true
+    },
+    "768": {
+      "scrollWidth": 768,
+      "innerWidth": 768,
+      "noOverflow": true
+    },
+    "1920": {
+      "scrollWidth": 1920,
+      "innerWidth": 1920,
+      "noOverflow": true
+    }
+  },
+  "screenshots": [
+    "D:\\projects\\home\\public\\test-screenshots\\scroll-0pct.png",
+    "D:\\projects\\home\\public\\test-screenshots\\scroll-0pct.png",
+    "D:\\projects\\home\\public\\test-screenshots\\scroll-25pct.png",
+    "D:\\projects\\home\\public\\test-screenshots\\scroll-50pct.png",
+    "D:\\projects\\home\\public\\test-screenshots\\scroll-75pct.png",
+    "D:\\projects\\home\\public\\test-screenshots\\scroll-100pct.png",
+    "D:\\projects\\home\\public\\test-screenshots\\cta-dialog-filled.png",
+    "D:\\projects\\home\\public\\test-screenshots\\reduced-motion.png"
+  ]
+}

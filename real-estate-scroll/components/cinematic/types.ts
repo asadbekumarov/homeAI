@@ -4,10 +4,11 @@ export interface Chapter {
   label: string;
   title: string;
   description: string;
-  src?: string;
   startProgress: number;
   endProgress: number;
 }
+
+export const VIDEO_SRC = "/video/video_2026-09-20_06-17-10.mp4";
 
 export const CHAPTERS: Chapter[] = [
   {
@@ -33,7 +34,7 @@ export const CHAPTERS: Chapter[] = [
     code: "03",
     label: "03 — EXPLORE",
     title: "EXPLORE",
-    description: "Corridors and architectural circulation connecting residential suites.",
+    description: "Corridors and architectural circulation connecting residential spaces.",
     startProgress: 0.50,
     endProgress: 0.75,
   },
@@ -42,7 +43,7 @@ export const CHAPTERS: Chapter[] = [
     code: "04",
     label: "04 — YOUR APARTMENT",
     title: "YOUR APARTMENT",
-    description: "Featured penthouse interior space with panoramic living layout.",
+    description: "Featured residence interior space with continuous architectural perspective.",
     startProgress: 0.75,
     endProgress: 1.0,
   },
