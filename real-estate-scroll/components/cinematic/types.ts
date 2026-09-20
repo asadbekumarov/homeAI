@@ -3,7 +3,8 @@ export interface Chapter {
   code: string;
   label: string;
   title: string;
-  src: string;
+  description: string;
+  src?: string;
   startProgress: number;
   endProgress: number;
 }
@@ -14,7 +15,7 @@ export const CHAPTERS: Chapter[] = [
     code: "01",
     label: "01 — CONSTRUCTION",
     title: "CONSTRUCTION",
-    src: "/videos/01-construction.mp4",
+    description: "Architectural structure from ground foundation to exterior completion.",
     startProgress: 0.0,
     endProgress: 0.25,
   },
@@ -23,7 +24,7 @@ export const CHAPTERS: Chapter[] = [
     code: "02",
     label: "02 — ENTRANCE",
     title: "ENTRANCE",
-    src: "/videos/02-entrance.mp4",
+    description: "Exterior arrival transition into the double-height grand lobby.",
     startProgress: 0.25,
     endProgress: 0.50,
   },
@@ -32,7 +33,7 @@ export const CHAPTERS: Chapter[] = [
     code: "03",
     label: "03 — EXPLORE",
     title: "EXPLORE",
-    src: "/videos/03-corridor.mp4",
+    description: "Corridors and architectural circulation connecting residential suites.",
     startProgress: 0.50,
     endProgress: 0.75,
   },
@@ -41,7 +42,7 @@ export const CHAPTERS: Chapter[] = [
     code: "04",
     label: "04 — YOUR APARTMENT",
     title: "YOUR APARTMENT",
-    src: "/videos/04-apartment.mp4",
+    description: "Featured penthouse interior space with panoramic living layout.",
     startProgress: 0.75,
     endProgress: 1.0,
   },

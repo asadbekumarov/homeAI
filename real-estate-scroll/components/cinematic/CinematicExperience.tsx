@@ -41,25 +41,16 @@ export const CinematicExperience: React.FC = () => {
   const trackBarRef = useRef<HTMLDivElement | null>(null);
   const apartmentCtaRef = useRef<HTMLDivElement | null>(null);
   const chapterRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Lenis instance reference
   const lenisRef = useRef<Lenis | null>(null);
-
-  // Video durations and loading tracking
-  const durationsRef = useRef<number[]>([10.0, 10.0, 9.96, 8.62]);
-  const loadedCountRef = useRef<number>(0);
 
   // Scrub & RAF tracking (NO React state during scroll)
   const masterProgressRef = useRef<number>(0);
   const activeChapterIndexRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
   const lastProgressRef = useRef<number>(-1);
-
-  // Seek queue to avoid dropping frames or interrupting browser video decoder
-  const isSeekingRef = useRef<boolean[]>([false, false, false, false]);
-  const lastSeekTimeRef = useRef<number[]>([0, 0, 0, 0]);
-  const targetTimeRef = useRef<number[]>([0, 0, 0, 0]);
 
   // Preloader and Reduced Motion states
   const isReducedMotion = React.useSyncExternalStore(
@@ -71,183 +62,82 @@ export const CinematicExperience: React.FC = () => {
   const [loadingPercent, setLoadingPercent] = useState<number>(0);
   const [isReady, setIsReady] = useState<boolean>(false);
 
-  // Reduced motion active chapter (only used when reduced motion is preferred)
+  // Reduced motion active chapter
   const [rmActiveChapter, setRmActiveChapter] = useState<number>(0);
-  const [rmIsPlaying, setRmIsPlaying] = useState<boolean>(false);
 
-  // Handle video metadata loading
-  const handleMetadata = useCallback((index: number, duration: number) => {
-    if (duration && !isNaN(duration) && duration > 0) {
-      durationsRef.current[index] = duration;
-    }
-    loadedCountRef.current += 1;
-    const progress = Math.min(
-      100,
-      Math.round((loadedCountRef.current / 4) * 100)
-    );
-    setLoadingPercent(progress);
-    if (progress >= 100) {
-      setTimeout(() => setIsReady(true), 300);
-    }
-  }, []);
-
-  const handleCanPlay = useCallback((index: number) => {
-    const video = videoRefs.current[index];
-    if (video) {
-      if (index === 0) {
-        video.currentTime = 0;
-      }
-    }
-  }, []);
-
-  const handleSeeked = useCallback((index: number) => {
-    isSeekingRef.current[index] = false;
-    const video = videoRefs.current[index];
-    if (!video) return;
-    const target = targetTimeRef.current[index];
-    if (Math.abs(video.currentTime - target) > 0.02) {
-      isSeekingRef.current[index] = true;
-      lastSeekTimeRef.current[index] = performance.now();
-      video.currentTime = target;
-    }
-  }, []);
-
-  // Preloader fallback timer: ensures experience starts even if events are throttled
+  // Clean, lightweight preloader
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoadingPercent(100);
-      setIsReady(true);
-    }, 1800);
+    const step1 = setTimeout(() => setLoadingPercent(50), 100);
+    const step2 = setTimeout(() => setLoadingPercent(100), 400);
+    const readyTimer = setTimeout(() => setIsReady(true), 600);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(step1);
+      clearTimeout(step2);
+      clearTimeout(readyTimer);
+    };
   }, []);
 
-  // Direct DOM and Video seek updates (Zero React re-renders)
+  // Direct DOM updates (Zero React re-renders)
   const applyFrameUpdates = useCallback((p: number) => {
-    const now = performance.now();
-
-    // 1. Update Video Playback and Opacity
-    // Each video is mapped so that it plays all the way from 0.0 to its full duration,
-    // holding the completed frame at the transition while crossfading seamlessly into the next.
+    // 1. Update Chapter Layers Opacity (0.00 to 1.00)
     for (let i = 0; i < 4; i++) {
-      const video = videoRefs.current[i];
-      if (!video) continue;
+      const layer = layerRefs.current[i];
+      if (!layer) continue;
 
-      const duration = durationsRef.current[i] || 10.0;
-      // Clamp to safe end frame to ensure the final frame is rendered without triggering video ended freeze
-      const safeDuration = Math.max(0.1, duration - 0.04);
-
-      let targetTime = 0;
       let opacity = 0;
 
       if (i === 0) {
-        // Video 1: Construction -> Completed Building (0.00 to 0.25)
-        // Plays fully from 0.0 to 10.0s over [0.00, 0.22]
+        // Chapter 1: 0.00 to 0.25 (crossfade out at 0.22 - 0.25)
         if (p <= 0.22) {
-          targetTime = (p / 0.22) * safeDuration;
           opacity = 1;
         } else if (p < 0.25) {
-          targetTime = safeDuration; // Hold completed building frame during crossfade
           opacity = (0.25 - p) / 0.03;
         } else {
-          targetTime = safeDuration;
           opacity = 0;
         }
       } else if (i === 1) {
-        // Video 2: Entrance -> Grand Lobby (0.25 to 0.50)
-        // Plays fully from 0.0 to 10.0s over [0.25, 0.47]
+        // Chapter 2: 0.25 to 0.50 (crossfade in at 0.22 - 0.25, out at 0.47 - 0.50)
         if (p < 0.22) {
-          targetTime = 0;
           opacity = 0;
         } else if (p < 0.25) {
-          targetTime = 0; // Primed at first frame while fading in
           opacity = (p - 0.22) / 0.03;
         } else if (p <= 0.47) {
-          targetTime = ((p - 0.25) / 0.22) * safeDuration;
           opacity = 1;
         } else if (p < 0.50) {
-          targetTime = safeDuration; // Hold completed lobby frame during crossfade
           opacity = (0.50 - p) / 0.03;
         } else {
-          targetTime = safeDuration;
           opacity = 0;
         }
       } else if (i === 2) {
-        // Video 3: Lobby -> Corridor -> Several Rooms (0.50 to 0.75)
-        // Plays fully from 0.0 to 9.96s over [0.50, 0.72]
+        // Chapter 3: 0.50 to 0.75 (crossfade in at 0.47 - 0.50, out at 0.72 - 0.75)
         if (p < 0.47) {
-          targetTime = 0;
           opacity = 0;
         } else if (p < 0.50) {
-          targetTime = 0; // Primed at first frame while fading in
           opacity = (p - 0.47) / 0.03;
         } else if (p <= 0.72) {
-          targetTime = ((p - 0.50) / 0.22) * safeDuration;
           opacity = 1;
         } else if (p < 0.75) {
-          targetTime = safeDuration; // Hold completed corridor frame during crossfade
           opacity = (0.75 - p) / 0.03;
         } else {
-          targetTime = safeDuration;
           opacity = 0;
         }
       } else if (i === 3) {
-        // Video 4: Corridor -> Featured Apartment (0.75 to 1.00)
-        // Plays fully from 0.0 to 8.62s over [0.75, 0.96]
+        // Chapter 4: 0.75 to 1.00 (crossfade in at 0.72 - 0.75, stays visible)
         if (p < 0.72) {
-          targetTime = 0;
           opacity = 0;
         } else if (p < 0.75) {
-          targetTime = 0; // Primed at first frame while fading in
           opacity = (p - 0.72) / 0.03;
-        } else if (p <= 0.96) {
-          targetTime = ((p - 0.75) / 0.21) * safeDuration;
-          opacity = 1;
         } else {
-          targetTime = safeDuration; // Hold completed apartment interior frame
           opacity = 1;
         }
       }
 
-      targetTime = Math.max(0, Math.min(safeDuration, targetTime));
-      targetTimeRef.current[i] = targetTime;
-
-      // Apply opacity and visibility
       const opacityClamped = Math.max(0, Math.min(1, opacity));
       const opacityStr = opacityClamped.toFixed(3);
-      if (video.style.opacity !== opacityStr) {
-        video.style.opacity = opacityStr;
-        video.style.visibility = opacityClamped > 0.001 ? "visible" : "hidden";
-      }
-
-      // Seek video with watchdog queue: avoids interrupting decoder while ensuring immediate updates
-      const isRelevant =
-        opacityClamped > 0.001 ||
-        (p >= i * 0.25 - 0.05 && p <= (i + 1) * 0.25 + 0.05);
-
-      if (isRelevant) {
-        // Watchdog: reset seeking lock if browser took longer than 100ms without firing seeked
-        if (
-          isSeekingRef.current[i] &&
-          now - lastSeekTimeRef.current[i] > 100
-        ) {
-          isSeekingRef.current[i] = false;
-        }
-
-        if (!isSeekingRef.current[i]) {
-          if (Math.abs(video.currentTime - targetTime) > 0.02) {
-            isSeekingRef.current[i] = true;
-            lastSeekTimeRef.current[i] = now;
-            video.currentTime = targetTime;
-          }
-        }
-      } else if (p < i * 0.25 && video.currentTime !== 0) {
-        video.currentTime = 0;
-      } else if (
-        p > (i + 1) * 0.25 &&
-        Math.abs(video.currentTime - safeDuration) > 0.05
-      ) {
-        video.currentTime = safeDuration;
+      if (layer.style.opacity !== opacityStr) {
+        layer.style.opacity = opacityStr;
+        layer.style.visibility = opacityClamped > 0.001 ? "visible" : "hidden";
       }
     }
 
@@ -416,16 +306,17 @@ export const CinematicExperience: React.FC = () => {
             </span>
           </div>
 
-          {/* Video Player */}
-          <div className="relative aspect-video w-full bg-black border border-white/10 overflow-hidden mb-6">
-            <video
-              key={rmActiveChapter}
-              src={CHAPTERS[rmActiveChapter].src}
-              controls
-              playsInline
-              className="w-full h-full object-cover"
-              autoPlay={rmIsPlaying}
-            />
+          {/* Chapter Details Card */}
+          <div className="relative aspect-video w-full bg-black border border-white/10 flex flex-col items-center justify-center p-8 mb-6">
+            <span className="text-xs tracking-[0.3em] text-neutral-400 uppercase mb-2">
+              CHAPTER {CHAPTERS[rmActiveChapter].code}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-light tracking-[0.2em] text-white uppercase mb-4 text-center">
+              {CHAPTERS[rmActiveChapter].title}
+            </h2>
+            <p className="text-xs md:text-sm text-neutral-400 text-center max-w-md font-light">
+              {CHAPTERS[rmActiveChapter].description}
+            </p>
           </div>
 
           {/* Chapter Selector Tabs */}
@@ -433,10 +324,7 @@ export const CinematicExperience: React.FC = () => {
             {CHAPTERS.map((ch, idx) => (
               <button
                 key={ch.id}
-                onClick={() => {
-                  setRmActiveChapter(idx);
-                  setRmIsPlaying(true);
-                }}
+                onClick={() => setRmActiveChapter(idx)}
                 className={`p-3 text-left border text-xs tracking-wider transition-colors cursor-pointer ${
                   rmActiveChapter === idx
                     ? "border-white bg-white/10 text-white font-medium"
@@ -510,7 +398,7 @@ export const CinematicExperience: React.FC = () => {
           {/* Bottom Loading Indicator */}
           <div className="w-full flex flex-col gap-3">
             <div className="flex justify-between items-center text-[11px] font-mono tracking-widest text-neutral-400">
-              <span>LOADING ASSETS</span>
+              <span>INITIALIZING</span>
               <span>{loadingPercent.toString().padStart(2, "0")}%</span>
             </div>
             <div className="w-full h-[1px] bg-white/10 overflow-hidden">
@@ -523,24 +411,19 @@ export const CinematicExperience: React.FC = () => {
         </div>
       )}
 
-      {/* Main Pinned Cinematic Track (1200vh total scroll distance for complete, unhurried video playback) */}
+      {/* Main Pinned Cinematic Track (500vh total scroll distance) */}
       <main
         ref={containerRef}
         className="relative w-full bg-[#050505] overflow-x-hidden"
-        style={{ height: "1200vh" }}
+        style={{ height: "500vh" }}
       >
         {/* Cinematic Pinned Viewport */}
         <div
           ref={pinRef}
           className="relative w-full h-screen overflow-hidden select-none"
         >
-          {/* 4 HTML5 Videos */}
-          <CinematicVideo
-            videoRefs={videoRefs}
-            onLoadedMetadata={handleMetadata}
-            onCanPlay={handleCanPlay}
-            onSeeked={handleSeeked}
-          />
+          {/* Visual Chapter Layers Template */}
+          <CinematicVideo layerRefs={layerRefs} />
 
           {/* Beginning Intro Hero Overlay (0% to 5%) */}
           <IntroOverlay ref={introRef} onExploreClick={handleExploreClick} />
