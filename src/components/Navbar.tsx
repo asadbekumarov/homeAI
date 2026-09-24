@@ -59,20 +59,40 @@ export default function Navbar() {
         </a>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-7">
           {navLinks.slice(1).map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={(e) => handleClick(e, link.href)}
               className={cn(
-                "text-sm tracking-wide transition-colors duration-300 hover:text-accent",
-                scrolled ? "text-foreground-muted" : "text-white/80 hover:text-white"
+                "text-xs tracking-[0.1em] uppercase transition-all duration-300 relative py-1 hover:text-accent font-medium",
+                scrolled ? "text-foreground/80 hover:text-accent" : "text-white/80 hover:text-white"
               )}
             >
               {link.label}
             </a>
           ))}
+        </div>
+
+        {/* CTA and Phone */}
+        <div className="hidden lg:flex items-center gap-5">
+          <a
+            href="tel:+998901234567"
+            className={cn(
+              "text-xs font-mono tracking-wider transition-colors",
+              scrolled ? "text-foreground-muted hover:text-foreground" : "text-white/70 hover:text-white"
+            )}
+          >
+            +998 90 123 45 67
+          </a>
+          <a
+            href="#contact"
+            onClick={(e) => handleClick(e, "#contact")}
+            className="px-5 py-2 rounded-full bg-accent hover:bg-accent-dark text-white text-xs tracking-[0.15em] uppercase font-medium transition-all shadow-md hover:shadow-accent/25 hover:scale-105 active:scale-95"
+          >
+            Konsultatsiya
+          </a>
         </div>
 
         {/* Mobile menu button */}

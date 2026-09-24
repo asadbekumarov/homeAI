@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 function Tower({
@@ -23,8 +23,8 @@ function Tower({
       <boxGeometry args={[width, height, depth]} />
       <meshStandardMaterial
         color="#C4B5A0"
-        roughness={0.85}
-        metalness={0.05}
+        roughness={0.7}
+        metalness={0.1}
       />
     </mesh>
   );
@@ -34,7 +34,7 @@ function TowerBase() {
   return (
     <mesh position={[0, 0.15, 0]}>
       <boxGeometry args={[6, 0.3, 4]} />
-      <meshStandardMaterial color="#A89880" roughness={0.9} metalness={0.02} />
+      <meshStandardMaterial color="#A89880" roughness={0.8} metalness={0.05} />
     </mesh>
   );
 }
@@ -43,7 +43,7 @@ function Ground() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
       <planeGeometry args={[20, 20]} />
-      <meshStandardMaterial color="#D6CFC6" roughness={1} metalness={0} />
+      <meshStandardMaterial color="#D6CFC6" roughness={0.9} metalness={0} />
     </mesh>
   );
 }
@@ -71,26 +71,28 @@ function RotatingGroup() {
 export default function BuildingScene() {
   return (
     <Canvas
-      camera={{ position: [8, 6, 8], fov: 35 }}
-      gl={{ antialias: true, alpha: true }}
+      camera={{ position: [11, 6, 11], fov: 38 }}
+      gl={{ antialias: true, alpha: true, powerPreference: "default" }}
       style={{ background: "transparent" }}
     >
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={0.8} />
       <directionalLight
-        position={[5, 10, 5]}
-        intensity={0.8}
+        position={[6, 12, 6]}
+        intensity={1.4}
         castShadow={false}
       />
       <directionalLight
-        position={[-5, 8, -3]}
-        intensity={0.3}
+        position={[-6, 8, -4]}
+        intensity={0.6}
+        color="#b0c4de"
       />
-      <pointLight position={[0, 10, 0]} intensity={0.2} />
+      <pointLight position={[0, 8, 4]} intensity={0.4} color="#ffd700" />
 
       <RotatingGroup />
       <Ground />
 
       <OrbitControls
+        target={[0, 2.5, 0]}
         enableZoom={false}
         enablePan={false}
         enableRotate={true}
@@ -98,8 +100,6 @@ export default function BuildingScene() {
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 2.2}
       />
-
-      <Environment preset="studio" environmentIntensity={0.3} />
     </Canvas>
   );
 }

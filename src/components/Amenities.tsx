@@ -84,19 +84,24 @@ export default function Amenities() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {amenities.map((amenity, i) => (
-            <ScrollReveal key={amenity.title} delay={i * 0.08}>
-              <div className="group p-6 lg:p-8 rounded-2xl bg-card border border-card-border hover:border-accent/40 transition-all duration-500 h-full">
-                <amenity.icon
-                  size={28}
-                  strokeWidth={1.5}
-                  className="text-accent mb-5 transition-transform duration-500 group-hover:scale-110"
-                />
-                <h3 className="font-serif text-xl text-foreground mb-3">
-                  {amenity.title}
-                </h3>
-                <p className="text-foreground-muted text-sm leading-relaxed">
-                  {amenity.description}
-                </p>
+            <ScrollReveal key={amenity.title} delay={i * 0.06}>
+              <div className="group p-7 lg:p-8 rounded-2xl bg-card border border-card-border/80 hover:border-accent hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-all duration-300">
+                    <amenity.icon
+                      size={22}
+                      strokeWidth={1.75}
+                      className="text-accent group-hover:text-white transition-colors duration-300"
+                    />
+                  </div>
+                  <h3 className="font-serif text-xl text-foreground font-semibold mb-3 group-hover:text-accent transition-colors">
+                    {amenity.title}
+                  </h3>
+                  <p className="text-foreground-muted text-sm leading-relaxed">
+                    {amenity.description}
+                  </p>
+                </div>
+                <div className="w-6 h-0.5 bg-accent/30 mt-6 group-hover:w-12 group-hover:bg-accent transition-all duration-300" />
               </div>
             </ScrollReveal>
           ))}

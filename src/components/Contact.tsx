@@ -184,26 +184,45 @@ export default function Contact() {
                 yordam berishdan xursand bo&apos;ladi.
               </p>
 
-              <div className="space-y-6">
+              {/* Direct messengers */}
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="https://t.me/thepalisades_uz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 rounded-full bg-[#2AABEE]/15 hover:bg-[#2AABEE] text-[#2AABEE] hover:text-white border border-[#2AABEE]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
+                >
+                  <span>Telegram orqali yozish</span>
+                </a>
+                <a
+                  href="https://wa.me/998901234567"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 rounded-full bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
+                >
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-divider">
                 {contactInfo.map((info) => (
-                  <div key={info.label} className="flex items-start gap-4">
-                    <info.icon
-                      size={20}
-                      className="text-accent mt-0.5 flex-shrink-0"
-                    />
+                  <div key={info.label} className="flex items-start gap-4 p-4 rounded-xl bg-card border border-card-border/60 hover:border-accent/40 transition-all">
+                    <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent flex-shrink-0">
+                      <info.icon size={18} />
+                    </div>
                     <div>
-                      <p className="text-foreground text-sm font-medium mb-1">
+                      <p className="text-foreground text-xs uppercase tracking-widest font-semibold mb-1 text-accent">
                         {info.label}
                       </p>
                       {info.href ? (
                         <a
                           href={info.href}
-                          className="text-foreground-muted text-sm hover:text-accent transition-colors"
+                          className="text-foreground text-sm font-medium hover:text-accent transition-colors"
                         >
                           {info.value}
                         </a>
                       ) : (
-                        <p className="text-foreground-muted text-sm">{info.value}</p>
+                        <p className="text-foreground text-sm font-medium">{info.value}</p>
                       )}
                     </div>
                   </div>

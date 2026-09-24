@@ -123,28 +123,64 @@ export default function Gallery() {
             className="lightbox-overlay"
             onClick={() => setLightboxImage(null)}
           >
+            {/* Close button */}
             <button
-              className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors z-10"
+              className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors z-20 cursor-pointer"
               onClick={() => setLightboxImage(null)}
               aria-label="Yopish"
             >
-              <X size={32} />
+              <X size={22} />
             </button>
+
+            {/* Navigation buttons */}
+            <button
+              className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 hover:bg-accent text-white flex items-center justify-center transition-all z-20 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                const curIdx = filtered.findIndex((im) => im.src === lightboxImage.src);
+                const prevIdx = (curIdx - 1 + filtered.length) % filtered.length;
+                setLightboxImage(filtered[prevIdx]);
+              }}
+              aria-label="Oldingi rasm"
+            >
+              <span className="text-xl">‹</span>
+            </button>
+
+            <button
+              className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 hover:bg-accent text-white flex items-center justify-center transition-all z-20 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                const curIdx = filtered.findIndex((im) => im.src === lightboxImage.src);
+                const nextIdx = (curIdx + 1) % filtered.length;
+                setLightboxImage(filtered[nextIdx]);
+              }}
+              aria-label="Keyingi rasm"
+            >
+              <span className="text-xl">›</span>
+            </button>
+
+            {/* Image container */}
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="relative w-[90vw] h-[80vh] max-w-5xl"
+              className="relative w-[92vw] h-[78vh] max-w-5xl flex flex-col items-center"
               onClick={(e) => e.stopPropagation()}
             >
-              <Image
-                src={lightboxImage.src}
-                alt={lightboxImage.alt}
-                fill
-                className="object-contain"
-                sizes="90vw"
-              />
+              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src={lightboxImage.src}
+                  alt={lightboxImage.alt}
+                  fill
+                  className="object-contain"
+                  sizes="92vw"
+                />
+              </div>
+              <div className="mt-4 text-center">
+                <p className="text-white text-base font-medium tracking-wide">{lightboxImage.alt}</p>
+                <p className="text-accent text-xs uppercase tracking-widest mt-1">{lightboxImage.category}</p>
+              </div>
             </motion.div>
           </motion.div>
         )}
