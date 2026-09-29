@@ -11,8 +11,8 @@ const stats = [
 
 export default function About() {
   return (
-    <section id="about" className="py-24 lg:py-36 px-6">
-      <div className="mx-auto max-w-5xl">
+    <section id="about" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 xl:px-10">
+      <div className="mx-auto max-w-7xl">
         {/* Section title */}
         <ScrollReveal>
           <div className="flex items-center gap-4 mb-12">
@@ -32,9 +32,9 @@ export default function About() {
 
         <ScrollReveal delay={0.2}>
           <p className="text-foreground-muted text-lg lg:text-xl leading-relaxed max-w-3xl mb-6">
-            The Palisades — Toshkent shahrining eng nufuzli hududida qurilayotgan uchta
-            hashamatli minoradan iborat turar-joy majmuasi. Har bir burchagi nafislik bilan
-            loyihalashtirilgan binolar, ko&apos;kalamzorlashtirilgan ichki hovli va panoramik
+            Murad Buildings — Toshkent shahrining eng nufuzli hududida qurilayotgan
+            hashamatli minoralar majmuasi. Har bir burchagi nafislik bilan
+            loyihalashtirilgan binolar, ko&apos;kalamzorlashtirilgan shaxsiy hovli va panoramik
             shahar manzarasi bilan ajralib turadi.
           </p>
         </ScrollReveal>

@@ -6,6 +6,8 @@ import ScrollReveal from "./ScrollReveal";
 const footerLinks = [
   { label: "Bosh sahifa", href: "#hero" },
   { label: "Loyiha haqida", href: "#about" },
+  { label: "3D Ko'rinish", href: "#interactive-3d" },
+  { label: "Kvartiralar", href: "#apartments" },
   { label: "Galereya", href: "#gallery" },
   { label: "Qulayliklar", href: "#amenities" },
   { label: "Joylashuv", href: "#location" },
@@ -22,28 +24,44 @@ export default function Footer() {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#")) {
       e.preventDefault();
-      document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+      const el = document.querySelector(href) as HTMLElement | null;
+      if (el) {
+        if (window.__lenis && typeof window.__lenis.scrollTo === "function") {
+          window.__lenis.scrollTo(el, { duration: 1.2 });
+        } else {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    }
+  };
+
+  const scrollToTop = () => {
+    if (window.__lenis && typeof window.__lenis.scrollTo === "function") {
+      window.__lenis.scrollTo(0, { duration: 1.2 });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   return (
-    <footer className="bg-foreground text-white/60">
-      <div className="mx-auto max-w-7xl px-6 lg:px-12 py-16 lg:py-20">
+    <footer className="bg-[#080706] text-white/70 border-t border-white/10 relative overflow-hidden">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 xl:px-10 py-16 lg:py-20">
         <ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
             {/* Logo & tagline */}
             <div>
               <h3 className="font-serif text-2xl text-white tracking-[0.15em] uppercase mb-4">
-                The Palisades
+                Murad Buildings
               </h3>
               <p className="text-sm leading-relaxed mb-6">
-                Osmon bilan yer chegarasida yashang. Toshkentning eng hashamatli
-                va nufuzli turar-joy majmuasi.
+                Baxt ulashamiz. Toshkentning eng nufuzli hududlarida barpo etilgan
+                elita darajadagi turar-joy majmualari.
               </p>
               <div className="space-y-2 text-xs">
-                <p className="text-white/80">+998 90 123 45 67</p>
-                <p className="text-white/80">info@thepalisades.uz</p>
-                <p className="text-white/50">Toshkent sh., Yunusobod tumani</p>
+                <p className="text-white/80">+998 71 200 88 22</p>
+                <p className="text-white/80">info@m-buildings.uz</p>
+                <p className="text-white/50">Toshkent sh., Mirobod tumani, Oybek ko&apos;chasi, 38a</p>
               </div>
             </div>
 
@@ -95,10 +113,11 @@ export default function Footer() {
         {/* Divider & copyright */}
         <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/50">
-            © {new Date().getFullYear()} The Palisades Luxury Residences. Barcha huquqlar himoyalangan.
+            © {new Date().getFullYear()} Murad Buildings. Barcha huquqlar himoyalangan.
           </p>
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            type="button"
+            onClick={scrollToTop}
             className="text-xs text-accent hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1 cursor-pointer"
           >
             <span>Tepaga qaytish</span>

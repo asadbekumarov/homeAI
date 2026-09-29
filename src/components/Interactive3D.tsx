@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import dynamic from "next/dynamic";
+import { useInView } from "framer-motion";
 import ScrollReveal from "./ScrollReveal";
 
 const BuildingScene = dynamic(() => import("./BuildingScene"), {
@@ -13,8 +15,11 @@ const BuildingScene = dynamic(() => import("./BuildingScene"), {
 });
 
 export default function Interactive3D() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { margin: "150px 0px" });
+
   return (
-    <section id="interactive-3d" className="py-24 lg:py-36 px-6 bg-background-dark">
+    <section id="interactive-3d" ref={sectionRef} className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 xl:px-10 bg-background-dark">
       <div className="mx-auto max-w-7xl">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Text */}
@@ -71,7 +76,7 @@ export default function Interactive3D() {
           {/* 3D Canvas */}
           <ScrollReveal delay={0.2} direction="right">
             <div className="relative aspect-square lg:aspect-[4/3] w-full rounded-2xl overflow-hidden bg-background border border-card-border shadow-2xl">
-              <BuildingScene />
+              <BuildingScene isVisible={isInView} />
 
               {/* Interactive badge overlay */}
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none">

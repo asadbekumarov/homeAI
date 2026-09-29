@@ -65,7 +65,7 @@ const amenities = [
 
 export default function Amenities() {
   return (
-    <section id="amenities" className="py-24 lg:py-36 px-6 bg-background-dark">
+    <section id="amenities" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 xl:px-10 bg-background-dark">
       <div className="mx-auto max-w-7xl">
         <ScrollReveal>
           <div className="flex items-center gap-4 mb-8">

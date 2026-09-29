@@ -5,7 +5,7 @@ import ScrollReveal from "./ScrollReveal";
 
 export default function Location() {
   return (
-    <section id="location" className="py-24 lg:py-36 px-6">
+    <section id="location" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 xl:px-10">
       <div className="mx-auto max-w-7xl">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Text */}
@@ -27,9 +27,9 @@ export default function Location() {
 
             <ScrollReveal delay={0.2}>
               <p className="text-foreground-muted text-lg leading-relaxed mb-8">
-                The Palisades Toshkent shahrining eng obod va rivojlangan hududlaridan
-                biri — Yunusobod tumanida joylashgan. Yaqin atrofda yirik savdo
-                markazlari, xalqaro maktablar, parklar va transport aloqalari mavjud.
+                Murad Buildings majmuasi Toshkent shahrining eng nufuzli va qulay hududlaridan
+                birida joylashgan. Yaqin atrofda yirik biznes markazlar, nufuzli maktablar,
+                parklar va poytaxtning asosiy yo&apos;l tarmoqlari mavjud.
               </p>
             </ScrollReveal>
 
@@ -40,7 +40,7 @@ export default function Location() {
                   <div>
                     <p className="text-foreground font-medium mb-1">Manzil</p>
                     <p className="text-foreground-muted text-sm">
-                      Toshkent sh., Yunusobod tumani, Bog&apos;ishamol ko&apos;chasi, 12-uy
+                      Toshkent sh., Mirobod tumani, Oybek ko&apos;chasi, 38a
                     </p>
                   </div>
                 </div>
@@ -51,8 +51,8 @@ export default function Location() {
                       Atrof-muhit
                     </p>
                     <p className="text-foreground-muted text-sm">
-                      Metro bekati — 5 daqiqa yurish · Tashkent City Mall — 8 daqiqa · 
-                      Xalqaro maktab — 3 daqiqa · Botanika bog&apos;i — 10 daqiqa
+                      Oybek metro bekati — 4 daqiqa · Tashkent City — 7 daqiqa · 
+                      Xalqaro aeroport — 10 daqiqa · Do&apos;stlar bog&apos;i — 5 daqiqa
                     </p>
                   </div>
                 </div>
@@ -65,7 +65,7 @@ export default function Location() {
             <div className="relative aspect-square lg:aspect-[4/3] w-full rounded-2xl overflow-hidden border border-card-border shadow-2xl bg-background-dark">
               {/* Styled map frame */}
               <iframe
-                title="The Palisades Joylashuvi"
+                title="Murad Buildings Joylashuvi"
                 src="https://www.openstreetmap.org/export/embed.html?bbox=69.270%2C41.345%2C69.315%2C41.370&layer=mapnik&marker=41.3575%2C69.2925"
                 className="w-full h-full border-0 filter invert-[0.92] hue-rotate-180 contrast-[1.15] opacity-85 transition-opacity duration-300 hover:opacity-100"
                 loading="lazy"
@@ -78,8 +78,8 @@ export default function Location() {
                     <MapPin size={16} />
                   </div>
                   <div>
-                    <h4 className="text-foreground text-sm font-semibold">The Palisades</h4>
-                    <p className="text-foreground-muted text-xs">Bog&apos;ishamol ko&apos;chasi, 12</p>
+                    <h4 className="text-foreground text-sm font-semibold">Murad Buildings</h4>
+                    <p className="text-foreground-muted text-xs">Oybek ko&apos;chasi, 38a</p>
                   </div>
                 </div>
               </div>

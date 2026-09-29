@@ -1,7 +1,7 @@
 "use client";
 
-import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
 import About from "@/components/About";
 import Gallery from "@/components/Gallery";
 import Amenities from "@/components/Amenities";
@@ -10,21 +10,27 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import SmoothScroll from "@/components/SmoothScroll";
 import Interactive3D from "@/components/Interactive3D";
+import BuildingExplorer from "@/components/BuildingExplorer";
+
+import { ProjectProvider } from "@/context/ProjectContext";
 
 export default function Home() {
   return (
-    <SmoothScroll>
-      <Navbar />
-      <main>
-        <Hero />
-        <About />
-        <Interactive3D />
-        <Gallery />
-        <Amenities />
-        <Location />
-        <Contact />
-      </main>
-      <Footer />
-    </SmoothScroll>
+    <ProjectProvider>
+      <SmoothScroll>
+        <Navbar />
+        <main id="main-content" className="relative bg-background">
+          <HeroSection />
+          <About />
+          <Interactive3D />
+          <BuildingExplorer />
+          <Gallery />
+          <Amenities />
+          <Location />
+          <Contact />
+        </main>
+        <Footer />
+      </SmoothScroll>
+    </ProjectProvider>
   );
 }

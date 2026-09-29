@@ -1,187 +1,594 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpRight,
+} from "lucide-react";
 import ScrollReveal from "./ScrollReveal";
 
-type Category = "Barchasi" | "Tashqi ko'rinish" | "Qulayliklar" | "Ichki xonalar";
+type Category =
+  | "Barchasi"
+  | "Tashqi ko'rinish"
+  | "Qulayliklar"
+  | "Ichki xonalar";
 
 interface GalleryImage {
   src: string;
   alt: string;
   category: Exclude<Category, "Barchasi">;
-  span?: string; // grid span classes
+  featured?: boolean;
 }
 
 const images: GalleryImage[] = [
-  { src: "/gallery/exterior-1.jpg", alt: "Bino tashqi ko'rinishi — kunduzgi", category: "Tashqi ko'rinish", span: "md:col-span-2 md:row-span-2" },
-  { src: "/gallery/interior-1.jpg", alt: "Zamonaviy yashash xonasi", category: "Ichki xonalar" },
-  { src: "/gallery/amenity-1.jpg", alt: "Tomdagi terassa", category: "Qulayliklar" },
-  { src: "/gallery/exterior-2.jpg", alt: "Bino tashqi ko'rinishi — kechqurun", category: "Tashqi ko'rinish" },
-  { src: "/gallery/interior-2.jpg", alt: "Oshxona dizayni", category: "Ichki xonalar" },
-  { src: "/gallery/amenity-2.jpg", alt: "Lobbi maydoni", category: "Qulayliklar", span: "md:col-span-2" },
-  { src: "/gallery/interior-3.jpg", alt: "Master yotoq xonasi", category: "Ichki xonalar" },
-  { src: "/gallery/exterior-3.jpg", alt: "Bog' va hovli", category: "Tashqi ko'rinish" },
+  {
+    src: "/gallery/exterior-1.jpg",
+    alt: "Bino tashqi ko'rinishi — kunduzgi",
+    category: "Tashqi ko'rinish",
+    featured: true,
+  },
+  {
+    src: "/gallery/interior-1.jpg",
+    alt: "Zamonaviy yashash xonasi",
+    category: "Ichki xonalar",
+  },
+  {
+    src: "/gallery/amenity-1.jpg",
+    alt: "Tomdagi terassa",
+    category: "Qulayliklar",
+  },
+  {
+    src: "/gallery/exterior-2.jpg",
+    alt: "Bino tashqi ko'rinishi — kechqurun",
+    category: "Tashqi ko'rinish",
+  },
+  {
+    src: "/gallery/interior-2.jpg",
+    alt: "Oshxona dizayni",
+    category: "Ichki xonalar",
+  },
+  {
+    src: "/gallery/amenity-2.jpg",
+    alt: "Lobbi maydoni",
+    category: "Qulayliklar",
+  },
+  {
+    src: "/gallery/interior-3.jpg",
+    alt: "Master yotoq xonasi",
+    category: "Ichki xonalar",
+  },
+  {
+    src: "/gallery/exterior-3.jpg",
+    alt: "Bog' va hovli",
+    category: "Tashqi ko'rinish",
+  },
 ];
 
-const categories: Category[] = ["Barchasi", "Tashqi ko'rinish", "Qulayliklar", "Ichki xonalar"];
+const categories: Category[] = [
+  "Barchasi",
+  "Tashqi ko'rinish",
+  "Qulayliklar",
+  "Ichki xonalar",
+];
 
 export default function Gallery() {
-  const [activeCategory, setActiveCategory] = useState<Category>("Barchasi");
-  const [lightboxImage, setLightboxImage] = useState<GalleryImage | null>(null);
+  const [activeCategory, setActiveCategory] =
+    useState<Category>("Barchasi");
 
-  const filtered = activeCategory === "Barchasi"
-    ? images
-    : images.filter((img) => img.category === activeCategory);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(
+    null
+  );
+
+  const filtered =
+    activeCategory === "Barchasi"
+      ? images
+      : images.filter((img) => img.category === activeCategory);
+
+  const lightboxImage =
+    lightboxIndex !== null ? filtered[lightboxIndex] : null;
+
+  const handlePrev = useCallback(() => {
+    if (lightboxIndex === null || filtered.length === 0) return;
+
+    setLightboxIndex(
+      (lightboxIndex - 1 + filtered.length) % filtered.length
+    );
+  }, [lightboxIndex, filtered.length]);
+
+  const handleNext = useCallback(() => {
+    if (lightboxIndex === null || filtered.length === 0) return;
+
+    setLightboxIndex(
+      (lightboxIndex + 1) % filtered.length
+    );
+  }, [lightboxIndex, filtered.length]);
+
+  const closeLightbox = useCallback(() => {
+    setLightboxIndex(null);
+  }, []);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeLightbox();
+      }
+
+      if (event.key === "ArrowLeft") {
+        handlePrev();
+      }
+
+      if (event.key === "ArrowRight") {
+        handleNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [lightboxIndex, closeLightbox, handlePrev, handleNext]);
+
+  const changeCategory = (category: Category) => {
+    setActiveCategory(category);
+    setLightboxIndex(null);
+  };
 
   return (
-    <section id="gallery" className="py-24 lg:py-36 px-6">
+    <section
+      id="gallery"
+      className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32 xl:px-10"
+    >
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
+
+        {/* --------------------------------
+            HEADER
+        -------------------------------- */}
         <ScrollReveal>
-          <div className="flex items-center gap-4 mb-8">
-            <div className="h-px flex-1 max-w-16 bg-accent" />
-            <span className="text-xs tracking-[0.3em] uppercase text-accent font-medium">
+          <div className="mb-10 flex items-center gap-4">
+            <span className="h-px w-10 bg-accent" />
+
+            <span className="text-[10px] font-medium uppercase tracking-[0.35em] text-accent sm:text-xs">
               Galereya
             </span>
+
+            <span className="h-px flex-1 bg-divider" />
           </div>
         </ScrollReveal>
 
-        <ScrollReveal delay={0.1}>
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground leading-tight mb-12">
-            Nafis <span className="text-accent">detallar</span>
-          </h2>
-        </ScrollReveal>
+        <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+          <ScrollReveal delay={0.05}>
+            <div className="max-w-2xl">
+              <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground-muted">
+                01 — Visual experience
+              </p>
 
-        {/* Category filter */}
-        <ScrollReveal delay={0.2}>
-          <div className="flex flex-wrap gap-3 mb-12">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 text-sm tracking-wide rounded-full border transition-all duration-300 ${
-                  activeCategory === cat
-                    ? "bg-accent text-white border-accent"
-                    : "bg-transparent text-foreground-muted border-divider hover:border-accent hover:text-accent"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </ScrollReveal>
+              <h2 className="font-serif text-4xl leading-[0.95] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                Nafis{" "}
+                <span className="text-accent">detallar.</span>
+              </h2>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((img, i) => (
-              <motion.div
-                key={img.src}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                className={`relative aspect-[4/3] overflow-hidden rounded-lg cursor-pointer group ${
-                  img.span || ""
-                }`}
-                onClick={() => setLightboxImage(img)}
-              >
-                {/* Placeholder bg while image loads */}
-                <div className="absolute inset-0 bg-background-dark" />
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                  <p className="text-white text-sm">{img.alt}</p>
-                  <p className="text-white/60 text-xs mt-1">{img.category}</p>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+              <p className="mt-6 max-w-lg text-sm leading-7 text-foreground-muted sm:text-base">
+                Har bir detal puxta o‘ylangan. Arxitektura,
+                interyer va kundalik hayot uchun yaratilgan
+                qulayliklarni kashf eting.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.1}>
+            <div className="font-mono text-xs uppercase tracking-widest text-foreground-muted">
+              <span className="text-foreground">
+                {String(filtered.length).padStart(2, "0")}
+              </span>{" "}
+              / {String(images.length).padStart(2, "0")} views
+            </div>
+          </ScrollReveal>
         </div>
 
+        {/* --------------------------------
+            FILTERS
+        -------------------------------- */}
+        <ScrollReveal delay={0.15}>
+          <div className="mt-12 border-y border-divider py-4">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {categories.map((category) => {
+                const active = activeCategory === category;
 
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => changeCategory(category)}
+                    className={`
+                      relative shrink-0 px-4 py-2.5
+                      text-[11px] font-medium uppercase
+                      tracking-[0.12em]
+                      transition-colors duration-300
+                      focus:outline-none
+                      focus-visible:ring-2
+                      focus-visible:ring-accent
+                      focus-visible:ring-offset-2
+                    `}
+                  >
+                    <span
+                      className={
+                        active
+                          ? "text-foreground"
+                          : "text-foreground-muted hover:text-foreground"
+                      }
+                    >
+                      {category}
+                    </span>
+
+                    {active && (
+                      <motion.span
+                        layoutId="gallery-filter"
+                        className="absolute inset-x-4 -bottom-[17px] h-px bg-accent"
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 35,
+                        }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </ScrollReveal>
+
+        {/* --------------------------------
+            GALLERY
+        -------------------------------- */}
+        <motion.div
+          layout
+          className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:gap-4"
+        >
+          <AnimatePresence mode="popLayout">
+            {filtered.map((image, index) => {
+              const isFirst = index === 0;
+              const isLarge = isFirst && filtered.length > 1;
+
+              return (
+                <motion.button
+                  key={image.src}
+                  layout
+                  type="button"
+                  initial={{
+                    opacity: 0,
+                    y: 20,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    scale: 0.97,
+                  }}
+                  transition={{
+                    duration: 0.45,
+                    delay: Math.min(index * 0.04, 0.2),
+                  }}
+                  onClick={() => setLightboxIndex(index)}
+                  className={`
+                    group relative block w-full
+                    overflow-hidden rounded-sm
+                    bg-background-dark
+                    text-left
+                    focus:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-accent
+                    focus-visible:ring-offset-4
+                    ${
+                      isLarge
+                        ? "sm:col-span-2 lg:col-span-7 lg:row-span-2"
+                        : "lg:col-span-5"
+                    }
+                  `}
+                  style={{
+                    aspectRatio: isLarge ? "1.18 / 1" : "1.45 / 1",
+                  }}
+                  aria-label={`${image.alt}. Kattalashtirib ko'rish`}
+                >
+                  {/* Image */}
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    priority={index === 0}
+                    sizes={
+                      isLarge
+                        ? "(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 58vw"
+                        : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 42vw"
+                    }
+                    className="
+                      object-cover
+                      transition-transform
+                      duration-1000
+                      ease-out
+                      group-hover:scale-[1.045]
+                    "
+                  />
+
+                  {/* Cinematic overlay */}
+                  <div
+                    className="
+                      absolute inset-0
+                      bg-gradient-to-t
+                      from-black/70
+                      via-black/5
+                      to-transparent
+                      opacity-80
+                      transition-opacity
+                      duration-500
+                      group-hover:opacity-100
+                    "
+                  />
+
+                  {/* Top metadata */}
+                  <div className="absolute left-5 top-5 flex items-center gap-3">
+                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/70">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <span className="h-px w-6 bg-white/40" />
+
+                    <span className="text-[9px] uppercase tracking-[0.18em] text-white/60">
+                      {image.category}
+                    </span>
+                  </div>
+
+                  {/* Bottom content */}
+                  <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
+                    <div>
+                      <p
+                        className="
+                          max-w-[300px]
+                          translate-y-2
+                          text-sm font-medium
+                          text-white
+                          opacity-0
+                          transition-all
+                          duration-500
+                          group-hover:translate-y-0
+                          group-hover:opacity-100
+                        "
+                      >
+                        {image.alt}
+                      </p>
+
+                      <div
+                        className="
+                          mt-2 h-px w-0
+                          bg-white/70
+                          transition-all
+                          duration-700
+                          group-hover:w-12
+                        "
+                      />
+                    </div>
+
+                    <span
+                      className="
+                        flex h-10 w-10 shrink-0
+                        translate-y-2
+                        items-center justify-center
+                        rounded-full
+                        border border-white/30
+                        bg-black/10
+                        text-white
+                        opacity-0
+                        backdrop-blur-sm
+                        transition-all
+                        duration-500
+                        group-hover:translate-y-0
+                        group-hover:opacity-100
+                      "
+                    >
+                      <ArrowUpRight size={17} strokeWidth={1.5} />
+                    </span>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Empty state */}
+        {filtered.length === 0 && (
+          <div className="flex min-h-[300px] items-center justify-center border border-divider">
+            <p className="text-sm text-foreground-muted">
+              Bu kategoriyada rasmlar mavjud emas.
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Lightbox */}
+      {/* --------------------------------
+          LIGHTBOX
+      -------------------------------- */}
       <AnimatePresence>
-        {lightboxImage && (
+        {lightboxImage && lightboxIndex !== null && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="lightbox-overlay"
-            onClick={() => setLightboxImage(null)}
+            className="
+              fixed inset-0 z-[100]
+              flex items-center justify-center
+              bg-black/95
+              px-4 py-6
+              backdrop-blur-md
+              sm:px-8
+            "
+            role="dialog"
+            aria-modal="true"
+            aria-label="Galereya rasmini to'liq ko'rish"
+            onClick={closeLightbox}
           >
-            {/* Close button */}
-            <button
-              className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors z-20 cursor-pointer"
-              onClick={() => setLightboxImage(null)}
-              aria-label="Yopish"
+            {/* Top bar */}
+            <div
+              className="
+                absolute left-0 right-0 top-0
+                flex items-center justify-between
+                px-5 py-5 sm:px-8
+              "
             >
-              <X size={22} />
-            </button>
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
+                <span className="text-white">
+                  {String(lightboxIndex + 1).padStart(2, "0")}
+                </span>{" "}
+                / {String(filtered.length).padStart(2, "0")}
+              </div>
 
-            {/* Navigation buttons */}
+              <button
+                type="button"
+                onClick={closeLightbox}
+                className="
+                  flex h-10 w-10 items-center justify-center
+                  rounded-full border border-white/15
+                  bg-white/5 text-white/80
+                  transition-all duration-300
+                  hover:border-white/30
+                  hover:bg-white/10
+                  hover:text-white
+                  focus:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-accent
+                "
+                aria-label="Yopish"
+              >
+                <X size={19} strokeWidth={1.5} />
+              </button>
+            </div>
+
+            {/* Previous */}
             <button
-              className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 hover:bg-accent text-white flex items-center justify-center transition-all z-20 cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                const curIdx = filtered.findIndex((im) => im.src === lightboxImage.src);
-                const prevIdx = (curIdx - 1 + filtered.length) % filtered.length;
-                setLightboxImage(filtered[prevIdx]);
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                handlePrev();
               }}
+              className="
+                absolute left-3 top-1/2 z-20
+                flex h-11 w-11
+                -translate-y-1/2
+                items-center justify-center
+                rounded-full
+                border border-white/15
+                bg-white/5
+                text-white
+                backdrop-blur-md
+                transition-all
+                duration-300
+                hover:bg-white/15
+                sm:left-8
+                sm:h-12 sm:w-12
+              "
               aria-label="Oldingi rasm"
             >
-              <span className="text-xl">‹</span>
+              <ChevronLeft size={20} strokeWidth={1.5} />
             </button>
 
+            {/* Next */}
             <button
-              className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 hover:bg-accent text-white flex items-center justify-center transition-all z-20 cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                const curIdx = filtered.findIndex((im) => im.src === lightboxImage.src);
-                const nextIdx = (curIdx + 1) % filtered.length;
-                setLightboxImage(filtered[nextIdx]);
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                handleNext();
               }}
+              className="
+                absolute right-3 top-1/2 z-20
+                flex h-11 w-11
+                -translate-y-1/2
+                items-center justify-center
+                rounded-full
+                border border-white/15
+                bg-white/5
+                text-white
+                backdrop-blur-md
+                transition-all
+                duration-300
+                hover:bg-white/15
+                sm:right-8
+                sm:h-12 sm:w-12
+              "
               aria-label="Keyingi rasm"
             >
-              <span className="text-xl">›</span>
+              <ChevronRight size={20} strokeWidth={1.5} />
             </button>
 
-            {/* Image container */}
+            {/* Image */}
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="relative w-[92vw] h-[78vh] max-w-5xl flex flex-col items-center"
-              onClick={(e) => e.stopPropagation()}
+              key={lightboxImage.src}
+              initial={{
+                opacity: 0,
+                scale: 0.97,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.97,
+              }}
+              transition={{
+                duration: 0.35,
+              }}
+              className="
+                relative
+                flex h-[72vh] w-[88vw]
+                max-w-6xl
+                flex-col
+                items-center
+                justify-center
+                sm:h-[78vh]
+              "
+              onClick={(event) => event.stopPropagation()}
             >
-              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative h-full w-full">
                 <Image
                   src={lightboxImage.src}
                   alt={lightboxImage.alt}
                   fill
+                  priority
+                  sizes="90vw"
                   className="object-contain"
-                  sizes="92vw"
                 />
               </div>
-              <div className="mt-4 text-center">
-                <p className="text-white text-base font-medium tracking-wide">{lightboxImage.alt}</p>
-                <p className="text-accent text-xs uppercase tracking-widest mt-1">{lightboxImage.category}</p>
+
+              {/* Caption */}
+              <div className="absolute -bottom-12 left-0 right-0 text-center sm:-bottom-14">
+                <p className="text-sm font-medium text-white">
+                  {lightboxImage.alt}
+                </p>
+
+                <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.25em] text-accent">
+                  {lightboxImage.category}
+                </p>
               </div>
             </motion.div>
+
+            {/* Bottom hint */}
+            <div className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 font-mono text-[9px] uppercase tracking-[0.2em] text-white/30 sm:block">
+              ← → navigate · ESC close
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

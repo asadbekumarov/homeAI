@@ -48,11 +48,11 @@ function Ground() {
   );
 }
 
-function RotatingGroup() {
+function RotatingGroup({ isVisible = true }: { isVisible?: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_state, delta) => {
-    if (groupRef.current) {
+    if (isVisible && groupRef.current) {
       groupRef.current.rotation.y += delta * 0.08;
     }
   });
@@ -68,9 +68,10 @@ function RotatingGroup() {
   );
 }
 
-export default function BuildingScene() {
+export default function BuildingScene({ isVisible = true }: { isVisible?: boolean }) {
   return (
     <Canvas
+      frameloop={isVisible ? "always" : "never"}
       camera={{ position: [11, 6, 11], fov: 38 }}
       gl={{ antialias: true, alpha: true, powerPreference: "default" }}
       style={{ background: "transparent" }}
@@ -88,7 +89,7 @@ export default function BuildingScene() {
       />
       <pointLight position={[0, 8, 4]} intensity={0.4} color="#ffd700" />
 
-      <RotatingGroup />
+      <RotatingGroup isVisible={isVisible} />
       <Ground />
 
       <OrbitControls

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant, Inter } from "next/font/google";
+import { Cormorant, Inter, Outfit, Space_Mono } from "next/font/google";
 import "./globals.css";
 
 const cormorant = Cormorant({
@@ -15,35 +15,56 @@ const inter = Inter({
   display: "swap",
 });
 
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  variable: "--font-space-mono",
+  display: "swap",
+  weight: ["400", "700"],
+});
+
 export const metadata: Metadata = {
-  title: "The Palisades — Toshkentdagi hashamatli turar-joy majmuasi",
+  title: "Murad Buildings — Toshkentdagi hashamatli turar-joy majmualari",
   description:
-    "The Palisades — Toshkent shahrining Yunusobod tumanidagi uchta hashamatli minoradan iborat zamonaviy turar-joy loyihasi. Panoramik manzara, ko'kalamzor hovli va premium qulayliklar.",
+    "Murad Buildings — Baxt ulashamiz. Toshkent shahrining nufuzli hududidagi hashamatli minoralar, panoramik shahar manzarasi, xavfsiz yashil hovli va 5 yulduzli qulayliklar.",
   keywords: [
-    "The Palisades",
+    "Murad Buildings",
+    "Do'stlar rezidensiyasi",
     "Toshkent turar-joy",
     "hashamatli xonadon",
     "yangi binolar Toshkent",
     "premium turar-joy",
-    "Yunusobod",
+    "Nest One",
   ],
   openGraph: {
-    title: "The Palisades — Osmon bilan yer chegarasida yashang",
+    title: "Murad Buildings — Baxt ulashamiz",
     description:
-      "Toshkentning eng nufuzli hududida joylashgan uchta hashamatli minoradan iborat turar-joy majmuasi.",
+      "Murad Buildings tomonidan barpo etilayotgan premium darajadagi zamonaviy turar-joy majmuasi.",
     type: "website",
     locale: "uz_UZ",
-    siteName: "The Palisades",
+    siteName: "Murad Buildings",
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="uz"
-      className={`${cormorant.variable} ${inter.variable} antialiased`}
+      className={`${cormorant.variable} ${inter.variable} ${outfit.variable} ${spaceMono.variable} antialiased dark`}
     >
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen bg-[#0C0B0A] text-[#F6F4F0] antialiased">
+        {children}
+      </body>
     </html>
   );
 }

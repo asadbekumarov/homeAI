@@ -3,13 +3,55 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Phone, Mail, MapPin, Clock, Send, CheckCircle2 } from "lucide-react";
 import ScrollReveal from "./ScrollReveal";
+import { cn } from "@/lib/cn";
+
+function formatUzbekPhone(value: string): string {
+  // Strip all non-digits
+  let digits = value.replace(/\D/g, "");
+
+  // If user enters 998 prefix, remove it to work with remaining 9 digits
+  if (digits.startsWith("998")) {
+    digits = digits.slice(3);
+  }
+
+  // Max 9 digits (operator code + number)
+  digits = digits.slice(0, 9);
+
+  if (digits.length === 0) return "";
+
+  let result = "+998";
+  if (digits.length > 0) {
+    result += ` (${digits.slice(0, 2)}`;
+  }
+  if (digits.length >= 2) {
+    result += `) ${digits.slice(2, 5)}`;
+  }
+  if (digits.length >= 5) {
+    result += `-${digits.slice(5, 7)}`;
+  }
+  if (digits.length >= 7) {
+    result += `-${digits.slice(7, 9)}`;
+  }
+
+  return result;
+}
 
 const contactSchema = z.object({
   name: z.string().min(2, "Ism kamida 2 ta belgidan iborat bo'lishi kerak"),
-  phone: z.string().min(9, "Telefon raqam noto'g'ri"),
+  phone: z
+    .string()
+    .min(1, "Telefon raqamini kiriting")
+    .refine(
+      (val) => {
+        const digits = val.replace(/\D/g, "");
+        // Must have exactly 9 digits or 12 digits (with 998)
+        return digits.length === 9 || (digits.startsWith("998") && digits.length === 12);
+      },
+      { message: "Telefon raqamini to'liq kiriting: +998 (XX) XXX-XX-XX" }
+    ),
   email: z.string().email("Email manzil noto'g'ri"),
   message: z.string().min(10, "Xabar kamida 10 ta belgidan iborat bo'lishi kerak"),
 });
@@ -20,29 +62,37 @@ const contactInfo = [
   {
     icon: Phone,
     label: "Telefon",
-    value: "+998 90 123 45 67",
-    href: "tel:+998901234567",
+    value: "+998 71 200 88 22",
+    href: "tel:+998712008822",
   },
   {
     icon: Mail,
     label: "Email",
-    value: "info@thepalisades.uz",
-    href: "mailto:info@thepalisades.uz",
+    value: "sales@m-buildings.uz",
+    href: "mailto:sales@m-buildings.uz",
   },
   {
     icon: MapPin,
     label: "Manzil",
-    value: "Toshkent sh., Yunusobod tumani, Bog'ishamol ko'chasi, 12-uy",
+    value: "Toshkent sh., Mirobod tumani, Oybek ko'chasi, 38a",
   },
   {
     icon: Clock,
     label: "Ish vaqti",
-    value: "Har kuni 09:00 - 19:00",
+    value: "Har kuni 09:00 - 20:00",
   },
 ];
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!submitted) return;
+    const timer = setTimeout(() => {
+      setSubmitted(false);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [submitted]);
 
   const {
     register,
@@ -51,19 +101,20 @@ export default function Contact() {
     reset,
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
+    mode: "onBlur",
   });
 
-  const onSubmit = async (data: ContactFormData) => {
+  const phoneRegistration = register("phone");
+
+  const onSubmit = async () => {
     // Simulate async submission
     await new Promise((resolve) => setTimeout(resolve, 800));
-    console.log("Form submitted:", data);
     setSubmitted(true);
     reset();
-    setTimeout(() => setSubmitted(false), 4000);
   };
 
   return (
-    <section id="contact" className="py-24 lg:py-36 px-6 bg-background-dark">
+    <section id="contact" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 xl:px-10 bg-background-dark">
       <div className="mx-auto max-w-7xl">
         <ScrollReveal>
           <div className="flex items-center gap-4 mb-8">
@@ -85,8 +136,8 @@ export default function Contact() {
           <ScrollReveal delay={0.2}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Name */}
-              <div>
-                <label htmlFor="contact-name" className="block text-sm text-foreground-muted mb-2 tracking-wide">
+              <div className="space-y-2">
+                <label htmlFor="contact-name" className="block text-sm text-foreground-muted tracking-wide font-medium">
                   Ismingiz
                 </label>
                 <input
@@ -94,33 +145,47 @@ export default function Contact() {
                   type="text"
                   {...register("name")}
                   placeholder="To'liq ismingiz"
-                  className="w-full px-4 py-3 bg-card border border-card-border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none focus:border-accent transition-colors duration-300"
+                  className={cn(
+                    "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none transition-colors duration-200",
+                    errors.name
+                      ? "border-red-400 focus:border-red-500 ring-1 ring-red-400/30"
+                      : "border-card-border focus:border-accent"
+                  )}
                 />
                 {errors.name && (
-                  <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>
+                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.name.message}</p>
                 )}
               </div>
 
               {/* Phone */}
-              <div>
-                <label htmlFor="contact-phone" className="block text-sm text-foreground-muted mb-2 tracking-wide">
+              <div className="space-y-2">
+                <label htmlFor="contact-phone" className="block text-sm text-foreground-muted tracking-wide font-medium">
                   Telefon
                 </label>
                 <input
                   id="contact-phone"
                   type="tel"
-                  {...register("phone")}
-                  placeholder="+998 90 123 45 67"
-                  className="w-full px-4 py-3 bg-card border border-card-border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none focus:border-accent transition-colors duration-300"
+                  {...phoneRegistration}
+                  onChange={(e) => {
+                    e.target.value = formatUzbekPhone(e.target.value);
+                    phoneRegistration.onChange(e);
+                  }}
+                  placeholder="+998 (90) 123-45-67"
+                  className={cn(
+                    "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none transition-colors duration-200 font-mono text-sm",
+                    errors.phone
+                      ? "border-red-400 focus:border-red-500 ring-1 ring-red-400/30"
+                      : "border-card-border focus:border-accent"
+                  )}
                 />
                 {errors.phone && (
-                  <p className="text-red-400 text-xs mt-1">{errors.phone.message}</p>
+                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone.message}</p>
                 )}
               </div>
 
               {/* Email */}
-              <div>
-                <label htmlFor="contact-email" className="block text-sm text-foreground-muted mb-2 tracking-wide">
+              <div className="space-y-2">
+                <label htmlFor="contact-email" className="block text-sm text-foreground-muted tracking-wide font-medium">
                   Email
                 </label>
                 <input
@@ -128,16 +193,21 @@ export default function Contact() {
                   type="email"
                   {...register("email")}
                   placeholder="sizning@email.uz"
-                  className="w-full px-4 py-3 bg-card border border-card-border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none focus:border-accent transition-colors duration-300"
+                  className={cn(
+                    "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none transition-colors duration-200",
+                    errors.email
+                      ? "border-red-400 focus:border-red-500 ring-1 ring-red-400/30"
+                      : "border-card-border focus:border-accent"
+                  )}
                 />
                 {errors.email && (
-                  <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>
+                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.email.message}</p>
                 )}
               </div>
 
               {/* Message */}
-              <div>
-                <label htmlFor="contact-message" className="block text-sm text-foreground-muted mb-2 tracking-wide">
+              <div className="space-y-2">
+                <label htmlFor="contact-message" className="block text-sm text-foreground-muted tracking-wide font-medium">
                   Xabaringiz
                 </label>
                 <textarea
@@ -145,33 +215,40 @@ export default function Contact() {
                   rows={4}
                   {...register("message")}
                   placeholder="Qiziqtirgan savol yoki taklifingiz..."
-                  className="w-full px-4 py-3 bg-card border border-card-border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none focus:border-accent transition-colors duration-300 resize-none"
+                  className={cn(
+                    "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none transition-colors duration-200 resize-none",
+                    errors.message
+                      ? "border-red-400 focus:border-red-500 ring-1 ring-red-400/30"
+                      : "border-card-border focus:border-accent"
+                  )}
                 />
                 {errors.message && (
-                  <p className="text-red-400 text-xs mt-1">{errors.message.message}</p>
+                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.message.message}</p>
                 )}
               </div>
 
               {/* Submit */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="group flex items-center gap-3 px-8 py-3.5 bg-accent hover:bg-accent-dark text-white rounded-lg transition-all duration-300 disabled:opacity-60"
-              >
-                {submitted ? (
-                  <>
-                    <CheckCircle2 size={18} />
-                    <span className="text-sm tracking-wide">Yuborildi!</span>
-                  </>
-                ) : (
-                  <>
-                    <Send size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-                    <span className="text-sm tracking-wide">
-                      {isSubmitting ? "Yuborilmoqda..." : "Yuborish"}
-                    </span>
-                  </>
-                )}
-              </button>
+              <div aria-live="polite" role="status">
+                <button
+                  type="submit"
+                  disabled={isSubmitting || submitted}
+                  className="group flex items-center gap-3 px-8 py-3.5 bg-accent hover:bg-accent-light text-[#0A0908] font-bold rounded-xl transition-all duration-300 disabled:opacity-60 cursor-pointer shadow-lg shadow-accent/25 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                >
+                  {submitted ? (
+                    <>
+                      <CheckCircle2 size={18} className="text-emerald-300" />
+                      <span className="text-sm tracking-wide font-medium">Yuborildi! Tez orada bog&apos;lanamiz</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                      <span className="text-sm tracking-wide font-medium">
+                        {isSubmitting ? "Yuborilmoqda..." : "Yuborish"}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </ScrollReveal>
 
@@ -187,7 +264,7 @@ export default function Contact() {
               {/* Direct messengers */}
               <div className="flex flex-wrap gap-3">
                 <a
-                  href="https://t.me/thepalisades_uz"
+                  href="https://t.me/muradbuildings_uz"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-5 py-2.5 rounded-full bg-[#2AABEE]/15 hover:bg-[#2AABEE] text-[#2AABEE] hover:text-white border border-[#2AABEE]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
@@ -195,7 +272,7 @@ export default function Contact() {
                   <span>Telegram orqali yozish</span>
                 </a>
                 <a
-                  href="https://wa.me/998901234567"
+                  href="https://wa.me/998712008822"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-5 py-2.5 rounded-full bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
