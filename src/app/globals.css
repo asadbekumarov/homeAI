@@ -40,6 +40,16 @@ body {
   font-family: var(--font-sans);
   overflow-x: hidden;
   letter-spacing: -0.01em;
+  /* Prevent horizontal bounce on iOS */
+  overscroll-behavior-x: none;
+}
+
+/* ─── Mobile Viewport Fix ────────────────────────────── */
+/* JS sets --vh in px units (e.g. 8.24px for 824px height).
+   The sticky hero uses calc(var(--vh) * 100) to fill exact
+   visible viewport, accounting for iOS Safari dynamic toolbar. */
+:root {
+  --vh: 1svh; /* fallback before JS runs — svh ≈ smallest viewport height */
 }
 
 /* ─── Text Selection ─────────────────────────────────── */

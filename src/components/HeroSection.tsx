@@ -56,6 +56,23 @@ export default function HeroSection() {
   const hudRef = useRef<HTMLDivElement>(null);
   const isHudVisibleRef = useRef(false);
   const activeChapterIndexRef = useRef(0);
+  const lastSeekTimeRef = useRef(0); // throttle iOS seek calls
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile once on mount
+  useEffect(() => {
+    const check = () =>
+      setIsMobile(
+        window.matchMedia("(pointer: coarse)").matches ||
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0
+      );
+    check();
+  }, []);
+
+  // Use visualViewport height to handle iOS Safari toolbar correctly
+  const getViewportHeight = () =>
+    window.visualViewport?.height ?? window.innerHeight;
 
   // Sync auto-play ref
   useEffect(() => {
@@ -203,6 +220,9 @@ export default function HeroSection() {
 
     const section = sectionRef.current;
 
+    // Minimum ms between seek calls — iOS Safari freezes if seeked >10x/sec
+    const SEEK_THROTTLE_MS = isMobile ? 80 : 16;
+
     const updateVideoTime = () => {
       const video = videoRef.current;
       if (!video) {
@@ -212,7 +232,8 @@ export default function HeroSection() {
 
       const rect = section.getBoundingClientRect();
       const sectionHeight = section.offsetHeight;
-      const viewportHeight = window.innerHeight;
+      // Use visualViewport to handle iOS Safari dynamic toolbar correctly
+      const viewportHeight = getViewportHeight();
 
       // When section is completely outside viewport, pause video and sleep
       if (rect.bottom < 0 || rect.top > viewportHeight) {
@@ -236,7 +257,6 @@ export default function HeroSection() {
         introOverlayRef.current.style.transform = `translate3d(0, -${(scrollProgress * 70).toFixed(1)}px, 0)`;
         introOverlayRef.current.style.pointerEvents = introOpacity > 0.05 ? "auto" : "none";
       }
-
 
       // HUD Visibility toggle (only modifies DOM classes when crossing boundary)
       const shouldShowHud = scrollProgress > 0.08;
@@ -301,7 +321,7 @@ export default function HeroSection() {
           }
         }
       } else {
-        // MANUAL SCROLLYTELLING SCRUBBING (Video is paused, 100% smooth frame interpolation)
+        // MANUAL SCROLLYTELLING SCRUBBING
         if (!video.paused) {
           video.pause();
         }
@@ -313,19 +333,24 @@ export default function HeroSection() {
 
         const delta = Math.abs(targetTime - currentTimeRef.current);
 
-        // Fast leap (large scroll jump / manual scrollbar drag): sync directly
+        // Fast leap (large scroll jump): sync directly
         if (delta > 1.5) {
           currentTimeRef.current = targetTime;
         } else {
-          // Responsive progressive lerp for buttery smooth glide with scroll
-          currentTimeRef.current += (targetTime - currentTimeRef.current) * 0.2;
+          // Progressive lerp — slower on mobile so decoder can keep up
+          const lerpFactor = isMobile ? 0.12 : 0.2;
+          currentTimeRef.current += (targetTime - currentTimeRef.current) * lerpFactor;
         }
 
-        // Apply to video element if delta is perceptible and decoder is not busy seeking
-        if (Math.abs(video.currentTime - currentTimeRef.current) > 0.012) {
-          if (!video.seeking) {
-            video.currentTime = currentTimeRef.current;
-          }
+        // Throttle actual seek calls on mobile to prevent iOS decoder overload
+        const now = performance.now();
+        const timeSinceLastSeek = now - lastSeekTimeRef.current;
+        const seekDelta = Math.abs(video.currentTime - currentTimeRef.current);
+        const seekThreshold = isMobile ? 0.05 : 0.012;
+
+        if (seekDelta > seekThreshold && !video.seeking && timeSinceLastSeek > SEEK_THROTTLE_MS) {
+          video.currentTime = currentTimeRef.current;
+          lastSeekTimeRef.current = now;
         }
       }
 
@@ -337,7 +362,7 @@ export default function HeroSection() {
     return () => {
       if (rafId.current) cancelAnimationFrame(rafId.current);
     };
-  }, [videoDuration]);
+  }, [videoDuration, isMobile]);
 
   // Smooth scroll to chapter
   const scrollToChapter = (index: number) => {
@@ -448,11 +473,19 @@ export default function HeroSection() {
     <section
       id="hero"
       ref={sectionRef}
-      className="relative h-[450vh] w-full"
+      // Mobile: 280vh is enough — long sections cause iOS rubber-band lag
+      // Desktop: 450vh for the full cinematic scroll experience
+      className="relative w-full h-[280vh] sm:h-[380vh] lg:h-[450vh]"
       aria-label="Murad Buildings taqdimoti"
     >
-      {/* Sticky viewport container */}
-      <div className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-[#0C0B0A]">
+      {/* Sticky viewport container — touch-action:pan-y so iOS doesn't block scroll */}
+      <div
+        className="sticky top-0 w-full overflow-hidden bg-[#0C0B0A]"
+        style={{
+          height: "calc(var(--vh, 1dvh) * 100)",
+          touchAction: "pan-y",
+        }}
+      >
         {/* Background Video */}
         <video
           ref={videoRef}

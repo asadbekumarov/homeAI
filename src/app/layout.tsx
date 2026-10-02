@@ -177,6 +177,23 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Set --vh from visualViewport so iOS Safari dynamic toolbar is handled */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function(){
+  function setVh(){
+    var vh=(window.visualViewport?window.visualViewport.height:window.innerHeight)*0.01;
+    document.documentElement.style.setProperty('--vh',vh+'px');
+  }
+  setVh();
+  window.addEventListener('resize',setVh,{passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',setVh,{passive:true});
+  }
+})();`,
+          }}
+        />
       </head>
       <body className="min-h-screen bg-[#0C0B0A] text-[#F6F4F0] antialiased">
         {children}
