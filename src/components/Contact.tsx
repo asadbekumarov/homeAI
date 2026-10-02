@@ -4,9 +4,29 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState, useEffect } from "react";
-import { Phone, Mail, MapPin, Clock, Send, CheckCircle2 } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, CheckCircle2, Globe } from "lucide-react";
 import ScrollReveal from "./ScrollReveal";
 import { cn } from "@/lib/cn";
+import { useProject } from "@/context/ProjectContext";
+
+function InstagramIcon({ size = 15 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
 
 function formatUzbekPhone(value: string): string {
   // Strip all non-digits
@@ -58,33 +78,34 @@ const contactSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactSchema>;
 
-const contactInfo = [
-  {
-    icon: Phone,
-    label: "Telefon",
-    value: "+998 71 200 88 22",
-    href: "tel:+998712008822",
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: "sales@m-buildings.uz",
-    href: "mailto:sales@m-buildings.uz",
-  },
-  {
-    icon: MapPin,
-    label: "Manzil",
-    value: "Toshkent sh., Mirobod tumani, Oybek ko'chasi, 38a",
-  },
-  {
-    icon: Clock,
-    label: "Ish vaqti",
-    value: "Har kuni 09:00 - 20:00",
-  },
-];
-
 export default function Contact() {
+  const { currentProject } = useProject();
   const [submitted, setSubmitted] = useState(false);
+
+  const contactInfo = [
+    {
+      icon: Phone,
+      label: "Call-markaz (24/7)",
+      value: currentProject?.phone || "+998 (71) 200-74-00",
+      href: `tel:${(currentProject?.phone || "+998712007400").replace(/\D/g, "")}`,
+    },
+    {
+      icon: Mail,
+      label: "Rasmiy Email",
+      value: currentProject?.email || "info@xonsaroy.uz",
+      href: `mailto:${currentProject?.email || "info@xonsaroy.uz"}`,
+    },
+    {
+      icon: MapPin,
+      label: "Sotuv ofisi manzili",
+      value: currentProject?.address || "Toshkent sh., Yunusobod t., Katta halqa yo‘li bo‘yi",
+    },
+    {
+      icon: Clock,
+      label: "Ish tartibi",
+      value: "Har kuni 24/7 yagona call-markaz",
+    },
+  ];
 
   useEffect(() => {
     if (!submitted) return;
@@ -261,23 +282,34 @@ export default function Contact() {
                 yordam berishdan xursand bo&apos;ladi.
               </p>
 
-              {/* Direct messengers */}
-              <div className="flex flex-wrap gap-3">
+              {/* Direct messengers and social links */}
+              <div className="flex flex-wrap gap-2.5">
                 <a
-                  href="https://t.me/muradbuildings_uz"
+                  href="https://t.me/XonSaroy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-full bg-[#2AABEE]/15 hover:bg-[#2AABEE] text-[#2AABEE] hover:text-white border border-[#2AABEE]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-xl bg-[#2AABEE]/15 hover:bg-[#2AABEE] text-[#2AABEE] hover:text-white border border-[#2AABEE]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
                 >
-                  <span>Telegram orqali yozish</span>
+                  <Send size={15} />
+                  <span>Telegram (@XonSaroy)</span>
                 </a>
                 <a
-                  href="https://wa.me/998712008822"
+                  href="https://www.instagram.com/xonsaroyuz/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-full bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-xl bg-[#E1306C]/15 hover:bg-[#E1306C] text-[#E1306C] hover:text-white border border-[#E1306C]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
                 >
-                  <span>WhatsApp</span>
+                  <InstagramIcon size={15} />
+                  <span>Instagram (@xonsaroyuz)</span>
+                </a>
+                <a
+                  href="https://xonsaroy.uz/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2.5 rounded-xl bg-accent/15 hover:bg-accent text-accent hover:text-[#0C0B0A] border border-accent/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
+                >
+                  <Globe size={15} />
+                  <span>xonsaroy.uz</span>
                 </a>
               </div>
 

@@ -1,65 +1,65 @@
 "use client";
 
 import {
-  Wifi,
   ShieldCheck,
   Trees,
   Zap,
   ConciergeBell,
-  Dumbbell,
   ParkingSquare,
-  Waves,
+  ShoppingBag,
+  Maximize,
+  ArrowUpCircle,
 } from "lucide-react";
 import ScrollReveal from "./ScrollReveal";
 
 const amenities = [
   {
-    icon: Trees,
-    title: "Tomdagi terassa",
+    icon: ParkingSquare,
+    title: "2 qavatli avtoturargoh",
     description:
-      "Panoramik shahar manzarasiga ega bo'lgan ko'kalamzor dam olish maydoni, oqshom sayridan rohatlaning.",
+      "2 qavatli keng yer osti va yer usti avtoturargohi hamda elektroavtomobillarni zaryadlash stansiyalari.",
+  },
+  {
+    icon: Trees,
+    title: "Bolalar va sport zonalari",
+    description:
+      "Ekologik yashil hovli, zamonaviy bolalar o‘yin maydonchalari va sun'iy qoplamali professional futbol maydoni.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "24/7 Xavfsizlik tizimi",
+    description:
+      "24/7 uzluksiz video nazorat, professional qo‘riqlash xizmati va begonalardan himoyalangan yopiq hovli tizimi.",
+  },
+  {
+    icon: ShoppingBag,
+    title: "Tijorat zonalari (3 qavat)",
+    description:
+      "Binoning pastki 3 qavatida aholi uchun maishiy xizmat ko‘rsatish shoxobchalari, kafelar va do‘konlar.",
+  },
+  {
+    icon: Maximize,
+    title: "3.1 Metr baland shiftlar",
+    description:
+      "Xonadonlarda kenglik va yorug'lik hissini kuchaytiruvchi 3.1 metrli shiftlar va panoramik oynalar.",
+  },
+  {
+    icon: ConciergeBell,
+    title: "Muhtasham Saroy Servis",
+    description:
+      "Aholi va mehmonlar uchun 24/7 konsyerj xizmati, qabul lobbisi va maishiy masalalarni tezkor hal qilish.",
+  },
+  {
+    icon: ArrowUpCircle,
+    title: "Tezyurar shovqinsiz liftlar",
+    description:
+      "Har bir blokda eng zamonaviy shovqinsiz liftlar — yer osti avtoturargohiga to'g'ridan-to'g'ri chiqish bilan.",
   },
   {
     icon: Zap,
     title: "Elektromobil zaryadlash",
     description:
-      "Har bir parking joyida tezkor zaryadlash stansiyalari — kelajak transporti uchun tayyor.",
-  },
-  {
-    icon: ParkingSquare,
-    title: "Yopiq parking",
-    description:
-      "Ko'p qavatli yopiq avtomobil to'xtash joyi, xavfsizlik kameralari va avtomatik kirish tizimi.",
-  },
-  {
-    icon: ConciergeBell,
-    title: "Lobbi va konsyerj",
-    description:
-      "24/7 konsyerj xizmati — mehmonlarni kutib olishdan tortib, har qanday so'rovingizni hal qilishgacha.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Xususiy koridorlar",
-    description:
-      "Shaxsiy kirish tizimlari va alohida koridorlar — sizning maxfiyligingiz bizning ustuvorligimiz.",
-  },
-  {
-    icon: Dumbbell,
-    title: "Sport va salomatlik",
-    description:
-      "Zamonaviy sport zali, yoga xonasi va SPA markazi — salomatligingiz uchun barcha sharoit.",
-  },
-  {
-    icon: Waves,
-    title: "Ochiq basseyn",
-    description:
-      "Tomdagi basseyn va yonidagi dam olish zonasi — shahar hayotidan qochish uchun mukammal joy.",
-  },
-  {
-    icon: Wifi,
-    title: "Aqlli uy tizimi",
-    description:
-      "Barcha xonadonlarda zamonaviy aqlli uy texnologiyalari — yoritish, harorat va xavfsizlikni boshqaring.",
+      "Ekologik transport egalari uchun avtoturargohda maxsus tezkor quvvatlash uskunalari o'rnatilgan.",
   },
 ];
 

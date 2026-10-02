@@ -2,8 +2,11 @@
 
 import { MapPin, Navigation } from "lucide-react";
 import ScrollReveal from "./ScrollReveal";
+import { useProject } from "@/context/ProjectContext";
 
 export default function Location() {
+  const { currentProject } = useProject();
+
   return (
     <section id="location" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 xl:px-10">
       <div className="mx-auto max-w-7xl">
@@ -27,9 +30,9 @@ export default function Location() {
 
             <ScrollReveal delay={0.2}>
               <p className="text-foreground-muted text-lg leading-relaxed mb-8">
-                Murad Buildings majmuasi Toshkent shahrining eng nufuzli va qulay hududlaridan
-                birida joylashgan. Yaqin atrofda yirik biznes markazlar, nufuzli maktablar,
-                parklar va poytaxtning asosiy yo&apos;l tarmoqlari mavjud.
+                {currentProject?.projectName || "Xon Saroy — Orzular"} majmuasi Toshkent shahrining nufuzli va qulay hududlaridan
+                birida joylashgan. Yaqin atrofda yirik savdo markazlari, ta&apos;lim muassasalari,
+                bog&apos;lar va qulay transport tarmoqlari mavjud.
               </p>
             </ScrollReveal>
 
@@ -40,7 +43,7 @@ export default function Location() {
                   <div>
                     <p className="text-foreground font-medium mb-1">Manzil</p>
                     <p className="text-foreground-muted text-sm">
-                      Toshkent sh., Mirobod tumani, Oybek ko&apos;chasi, 38a
+                      {currentProject?.address || "Toshkent shahri"}
                     </p>
                   </div>
                 </div>
@@ -48,11 +51,11 @@ export default function Location() {
                   <Navigation size={20} className="text-accent mt-1 flex-shrink-0" />
                   <div>
                     <p className="text-foreground font-medium mb-1">
-                      Atrof-muhit
+                      Asosiy mo&apos;ljallar va masofa
                     </p>
-                    <p className="text-foreground-muted text-sm">
-                      Oybek metro bekati — 4 daqiqa · Tashkent City — 7 daqiqa · 
-                      Xalqaro aeroport — 10 daqiqa · Do&apos;stlar bog&apos;i — 5 daqiqa
+                    <p className="text-foreground-muted text-sm leading-relaxed">
+                      Metro 3-bekati — 650 m (8 daqiqa) · &quot;Oltin Kalitcha&quot; bog‘chasi — 250 m (3 daqiqa) · 
+                      255-sonli umumta&apos;lim maktabi — 300 m (4 daqiqa) · Katta halqa yo‘li bo‘yida
                     </p>
                   </div>
                 </div>
@@ -65,8 +68,8 @@ export default function Location() {
             <div className="relative aspect-square lg:aspect-[4/3] w-full rounded-2xl overflow-hidden border border-card-border shadow-2xl bg-background-dark">
               {/* Styled map frame */}
               <iframe
-                title="Murad Buildings Joylashuvi"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=69.270%2C41.345%2C69.315%2C41.370&layer=mapnik&marker=41.3575%2C69.2925"
+                title="Xon Saroy — Orzular Joylashuvi"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=69.260%2C41.350%2C69.310%2C41.385&layer=mapnik&marker=41.3680%2C69.2880"
                 className="w-full h-full border-0 filter invert-[0.92] hue-rotate-180 contrast-[1.15] opacity-85 transition-opacity duration-300 hover:opacity-100"
                 loading="lazy"
               />
@@ -78,8 +81,12 @@ export default function Location() {
                     <MapPin size={16} />
                   </div>
                   <div>
-                    <h4 className="text-foreground text-sm font-semibold">Murad Buildings</h4>
-                    <p className="text-foreground-muted text-xs">Oybek ko&apos;chasi, 38a</p>
+                    <h4 className="text-foreground text-sm font-semibold">
+                      {currentProject?.projectName || "Xon Saroy — Orzular"}
+                    </h4>
+                    <p className="text-foreground-muted text-xs">
+                      Yunusobod t., Katta halqa yo‘li bo‘yi
+                    </p>
                   </div>
                 </div>
               </div>
@@ -87,7 +94,7 @@ export default function Location() {
               {/* External map buttons */}
               <div className="absolute bottom-4 right-4 flex items-center gap-2">
                 <a
-                  href="https://maps.google.com/?q=41.3575,69.2925"
+                  href="https://maps.google.com/?q=41.3680,69.2880"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 rounded-lg bg-background-dark/90 hover:bg-accent hover:text-white transition-colors duration-200 text-foreground-muted text-xs border border-card-border backdrop-blur-sm"
@@ -95,7 +102,7 @@ export default function Location() {
                   Google Maps
                 </a>
                 <a
-                  href="https://yandex.com/maps/?pt=69.2925,41.3575&z=15&l=map"
+                  href="https://yandex.com/maps/?pt=69.2880,41.3680&z=15&l=map"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 rounded-lg bg-background-dark/90 hover:bg-accent hover:text-white transition-colors duration-200 text-foreground-muted text-xs border border-card-border backdrop-blur-sm"

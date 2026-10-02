@@ -17,7 +17,7 @@ describe("Navbar Component", () => {
   it("renders the brand header and default developer name", () => {
     renderWithProvider(<Navbar />);
 
-    const brandLink = screen.getByRole("link", { name: /murad buildings bosh sahifa/i });
+    const brandLink = screen.getByRole("link", { name: /bosh sahifa/i });
     expect(brandLink).toBeInTheDocument();
   });
 

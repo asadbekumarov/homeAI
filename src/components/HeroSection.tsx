@@ -13,6 +13,8 @@ import {
   RotateCcw,
 } from "lucide-react";
 
+import { useProject } from "@/context/ProjectContext";
+
 export interface ChapterItem {
   code: string;
   title: string;
@@ -21,13 +23,15 @@ export interface ChapterItem {
 }
 
 export const HERO_CHAPTERS: ChapterItem[] = [
-  { code: "01", title: "Me'moriy Kontseptsiya", subtitle: "Murad Buildings monolit fasadlari", target: 0.0 },
-  { code: "02", title: "Grand Lobbi", subtitle: "Marmar va 24/7 xizmat", target: 0.28 },
+  { code: "01", title: "Me'moriy Kontseptsiya", subtitle: "Komfort va Biznes klass uyg'unligi", target: 0.0 },
+  { code: "02", title: "Muhtasham Saroy Servis", subtitle: "24/7 xavfsizlik va konsyerj", target: 0.28 },
   { code: "03", title: "Xavfsiz Yashil Hudud", subtitle: "Maxsus landshaft va osoyishtalik", target: 0.58 },
-  { code: "04", title: "Premium Xonadonlar", subtitle: "Panoramik shahar manzarasi", target: 0.88 },
+  { code: "04", title: "Zamonaviy Xonadonlar", subtitle: "Orzularingizdagi qulay rejalashtirish", target: 0.88 },
 ];
 
 export default function HeroSection() {
+  const { currentProject } = useProject();
+  const chapters = currentProject?.chapters || HERO_CHAPTERS;
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const theaterVideoRef = useRef<HTMLVideoElement>(null);
@@ -507,8 +511,8 @@ export default function HeroSection() {
           }}
         >
           {/* Minimalist Serif Title */}
-          <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-white tracking-[0.12em] sm:tracking-[0.16em] uppercase font-light drop-shadow-[0_6px_35px_rgba(0,0,0,0.95)] mb-6 sm:mb-8 select-none leading-none">
-            Murad Buildings
+          <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-white tracking-[0.08em] sm:tracking-[0.12em] uppercase font-light drop-shadow-[0_6px_35px_rgba(0,0,0,0.95)] mb-6 sm:mb-8 select-none leading-none">
+            {currentProject?.projectName || "Xon Saroy — Orzular"}
           </h1>
 
           {/* Scroll Down Prompt */}

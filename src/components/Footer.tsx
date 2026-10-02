@@ -2,6 +2,7 @@
 
 import { Globe, ExternalLink, Send } from "lucide-react";
 import ScrollReveal from "./ScrollReveal";
+import { useProject } from "@/context/ProjectContext";
 
 const footerLinks = [
   { label: "Bosh sahifa", href: "#hero" },
@@ -15,12 +16,14 @@ const footerLinks = [
 ];
 
 const socialLinks = [
-  { icon: Globe, href: "https://instagram.com", label: "Instagram" },
-  { icon: ExternalLink, href: "https://facebook.com", label: "Facebook" },
-  { icon: Send, href: "https://t.me", label: "Telegram" },
+  { icon: Globe, href: "https://instagram.com/xonsaroyuz", label: "Instagram" },
+  { icon: ExternalLink, href: "https://facebook.com/xonsaroyuz", label: "Facebook" },
+  { icon: Send, href: "https://t.me/xonsaroyuz", label: "Telegram" },
 ];
 
 export default function Footer() {
+  const { currentProject } = useProject();
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#")) {
       e.preventDefault();
@@ -52,16 +55,15 @@ export default function Footer() {
             {/* Logo & tagline */}
             <div>
               <h3 className="font-serif text-2xl text-white tracking-[0.15em] uppercase mb-4">
-                Murad Buildings
+                {currentProject?.projectName || "Xon Saroy — Orzular"}
               </h3>
               <p className="text-sm leading-relaxed mb-6">
-                Baxt ulashamiz. Toshkentning eng nufuzli hududlarida barpo etilgan
-                elita darajadagi turar-joy majmualari.
+                {currentProject?.tagline || "Orzulardan ilhomlangan"}. Zamonaviy arxitektura va ilg‘or infratuzilmani o‘zida mujassam etgan Komfort va Biznes klass majmuasi.
               </p>
               <div className="space-y-2 text-xs">
-                <p className="text-white/80">+998 71 200 88 22</p>
-                <p className="text-white/80">info@m-buildings.uz</p>
-                <p className="text-white/50">Toshkent sh., Mirobod tumani, Oybek ko&apos;chasi, 38a</p>
+                <p className="text-white/80">{currentProject?.phone || "+998 71 200 74 00"}</p>
+                <p className="text-white/80">{currentProject?.email || "info@xonsaroy.uz"}</p>
+                <p className="text-white/50">{currentProject?.address || "Toshkent shahri"}</p>
               </div>
             </div>
 
@@ -113,7 +115,7 @@ export default function Footer() {
         {/* Divider & copyright */}
         <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/50">
-            © {new Date().getFullYear()} Murad Buildings. Barcha huquqlar himoyalangan.
+            © {new Date().getFullYear()} {currentProject?.developerName || "Xon Saroy"}. Barcha huquqlar himoyalangan.
           </p>
           <button
             type="button"

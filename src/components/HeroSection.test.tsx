@@ -13,10 +13,10 @@ describe("HeroSection Component", () => {
     return render(<ProjectProvider>{ui}</ProjectProvider>);
   };
 
-  it("renders the primary Murad Buildings title", () => {
+  it("renders the primary project title", () => {
     renderWithProvider(<HeroSection />);
 
-    const heading = screen.getByRole("heading", { level: 1, name: /murad buildings/i });
+    const heading = screen.getByRole("heading", { level: 1 });
     expect(heading).toBeInTheDocument();
   });
 

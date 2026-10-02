@@ -25,6 +25,7 @@ import {
   type ApartmentStatus,
   calculateBuildingStats,
 } from "@/types/building";
+import { useProject } from "@/context/ProjectContext";
 
 interface BuildingExplorerProps {
   initialBuilding?: typeof mockBuildingData;
@@ -33,7 +34,8 @@ interface BuildingExplorerProps {
 export default function BuildingExplorer({
   initialBuilding = mockBuildingData,
 }: BuildingExplorerProps) {
-  const building = initialBuilding;
+  const { currentProject } = useProject();
+  const building = currentProject?.building || initialBuilding;
   const stats = useMemo(() => calculateBuildingStats(building), [building]);
 
   // Tanlangan qavat (default: eng yuqori qavat yoki birinchi qavat)
@@ -165,12 +167,12 @@ export default function BuildingExplorer({
     <section id="apartments" className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 xl:px-10 bg-background relative overflow-hidden">
       <div className="mx-auto max-w-7xl">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
           <div>
             <div className="flex items-center gap-3 mb-3">
               <span className="w-8 h-px bg-accent" />
               <span className="text-xs tracking-[0.25em] uppercase text-accent font-semibold">
-                Murad Buildings · Interaktiv bino rejasi
+                {currentProject?.projectName || "Xon Saroy — Orzular"} · Interaktiv bino rejasi
               </span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-foreground font-normal tracking-tight">
@@ -187,20 +189,54 @@ export default function BuildingExplorer({
             <div className="px-3 py-2 text-center border-r border-divider/60">
               <div className="text-xs text-foreground-muted">Jami kvartiralar</div>
               <div className="text-lg sm:text-xl font-semibold text-foreground">
-                {stats.totalApartments}
+                1600 ta
               </div>
             </div>
             <div className="px-3 py-2 text-center border-r border-divider/60">
-              <div className="text-xs text-emerald-400 font-medium">Bo&apos;sh</div>
+              <div className="text-xs text-emerald-400 font-medium">Bloklar</div>
               <div className="text-lg sm:text-xl font-semibold text-emerald-400">
-                {stats.available}
+                14 ta blok
               </div>
             </div>
             <div className="px-3 py-2 text-center">
-              <div className="text-xs text-amber-400 font-medium">Band / Sotuv</div>
+              <div className="text-xs text-accent font-medium">Shift balandligi</div>
               <div className="text-lg sm:text-xl font-semibold text-foreground">
-                {stats.reserved + stats.sold}
+                3.1 metr
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Xon Saroy Layouts & Payment terms notice */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="p-4 rounded-2xl bg-card border border-card-border/80 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center text-accent shrink-0 mt-0.5">
+              <Sparkles size={16} />
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-accent mb-1">
+                10 xildan ortiq rejaviy yechimlar
+              </h4>
+              <p className="text-xs text-foreground-muted leading-relaxed">
+                <strong className="text-foreground font-medium">1 xonali:</strong> 35–48 m² ·{" "}
+                <strong className="text-foreground font-medium">2 xonali:</strong> 54–72 m² ·{" "}
+                <strong className="text-foreground font-medium">3 xonali:</strong> 80–120 m² ·{" "}
+                <strong className="text-foreground font-medium">Pentxauslar:</strong> 197.7 m² gacha
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-card border border-card-border/80 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+              <DollarSign size={16} />
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">
+                Qulay to&apos;lov va muddatli to&apos;lov (Rassrochka)
+              </h4>
+              <p className="text-xs text-foreground-muted leading-relaxed">
+                100% to‘lovda maxsus chegirmalar. 30% yoki 50% boshlang‘ich to‘lov bilan uylar topshirilgunga qadar (18 oydan 36 oygacha) 0% foizsiz muddatli to‘lov.
+              </p>
             </div>
           </div>
         </div>

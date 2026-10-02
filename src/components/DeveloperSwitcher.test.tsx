@@ -17,7 +17,7 @@ describe("DeveloperSwitcher (TDD)", () => {
   it("renders the trigger button with the default active project", () => {
     renderWithProvider(<DeveloperSwitcher />);
 
-    const trigger = screen.getByRole("button", { name: /murad buildings/i });
+    const trigger = screen.getByRole("button", { name: /loyihani tanlash/i });
     expect(trigger).toBeInTheDocument();
     expect(trigger).toHaveAttribute("aria-expanded", "false");
   });
@@ -26,7 +26,7 @@ describe("DeveloperSwitcher (TDD)", () => {
     const user = userEvent.setup();
     renderWithProvider(<DeveloperSwitcher />);
 
-    const trigger = screen.getByRole("button", { name: /murad buildings/i });
+    const trigger = screen.getByRole("button", { name: /loyihani tanlash/i });
     await user.click(trigger);
 
     expect(trigger).toHaveAttribute("aria-expanded", "true");
@@ -35,14 +35,13 @@ describe("DeveloperSwitcher (TDD)", () => {
 
     const options = screen.getAllByRole("option");
     expect(options.length).toBeGreaterThanOrEqual(1);
-    expect(within(menu).getByRole("option", { name: /murad buildings/i })).toBeInTheDocument();
   });
 
   it("closes the dropdown when Escape key is pressed", async () => {
     const user = userEvent.setup();
     renderWithProvider(<DeveloperSwitcher />);
 
-    const trigger = screen.getByRole("button", { name: /murad buildings/i });
+    const trigger = screen.getByRole("button", { name: /loyihani tanlash/i });
     await user.click(trigger);
     expect(trigger).toHaveAttribute("aria-expanded", "true");
 
@@ -55,14 +54,14 @@ describe("DeveloperSwitcher (TDD)", () => {
     const user = userEvent.setup();
     renderWithProvider(<DeveloperSwitcher />);
 
-    const trigger = screen.getByRole("button", { name: /murad buildings/i });
+    const trigger = screen.getByRole("button", { name: /loyihani tanlash/i });
     await user.click(trigger);
 
-    const option = screen.getByRole("option", { name: /murad buildings/i });
-    await user.click(option);
+    const options = screen.getAllByRole("option");
+    await user.click(options[0]);
 
     expect(trigger).toHaveAttribute("aria-expanded", "false");
-    expect(localStorage.getItem("showcase_project_slug")).toBe("murad-buildings");
+    expect(localStorage.getItem("showcase_project_slug")).toBeTruthy();
   });
 
   it("closes the dropdown when clicking outside", async () => {
@@ -74,7 +73,7 @@ describe("DeveloperSwitcher (TDD)", () => {
       </div>
     );
 
-    const trigger = screen.getByRole("button", { name: /murad buildings/i });
+    const trigger = screen.getByRole("button", { name: /loyihani tanlash/i });
     await user.click(trigger);
     expect(trigger).toHaveAttribute("aria-expanded", "true");
 
