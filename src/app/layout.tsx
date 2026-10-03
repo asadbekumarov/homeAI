@@ -1,31 +1,37 @@
 import type { Metadata } from "next";
-import { Cormorant, Inter, Outfit, Space_Mono } from "next/font/google";
+// Inter olib tashlandi — Outfit uni to'liq almashtiradi (ikki font bir xil vazifani bajaradi)
+import { Cormorant, Outfit, Space_Mono, Geist } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const cormorant = Cormorant({
   subsets: ["latin"],
   variable: "--font-cormorant",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
+  // 5 weight → 3 weight: sahifada ishlatiladigan minimumga tushirildi
+  weight: ["300", "400", "600"],
+  preload: true,
 });
 
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
   display: "swap",
+  // Faqat ishlatiladigan weightlar
+  weight: ["300", "400", "500"],
+  preload: true,
 });
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
   variable: "--font-space-mono",
   display: "swap",
-  weight: ["400", "700"],
+  // Faqat regular — mono font LCP'ga ta'sir qilmaydi
+  weight: ["400"],
+  // preload: false — sahifa yuklangandan keyin yuklanadi
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -170,30 +176,21 @@ export default function RootLayout({
   return (
     <html
       lang="uz"
-      className={`${cormorant.variable} ${inter.variable} ${outfit.variable} ${spaceMono.variable} antialiased dark`}
+      suppressHydrationWarning
+      // Inter o'chirildi — fontlar 4 ta → 3 ta
+      className={cn("antialiased", "dark", cormorant.variable, outfit.variable, spaceMono.variable, "font-sans", geist.variable)}
     >
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {/* Set --vh from visualViewport so iOS Safari dynamic toolbar is handled */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-(function(){
-  function setVh(){
-    var vh=(window.visualViewport?window.visualViewport.height:window.innerHeight)*0.01;
-    document.documentElement.style.setProperty('--vh',vh+'px');
-  }
-  setVh();
-  window.addEventListener('resize',setVh,{passive:true});
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',setVh,{passive:true});
-  }
-})();`,
-          }}
-        />
+        {/*
+          --vh skripti o'chirildi:
+          globals.css da '--vh: 1svh' fallback allaqachon mavjud.
+          svh unit zamonaviy iOS Safari (15.4+), Chrome 108+ da ishlaydi.
+          Agarda eski iOS qo'llab-quvvatlash kerak bo'lsa, bu blokni qaytarish mumkin.
+        */}
       </head>
       <body className="min-h-screen bg-[#0C0B0A] text-[#F6F4F0] antialiased">
         {children}

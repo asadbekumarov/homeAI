@@ -225,9 +225,9 @@ export default function Interactive3D() {
                     {/* Bottom Info Overlay */}
                     <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-black/70 backdrop-blur-md border border-white/10">
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <h4 className="text-sm font-serif font-semibold text-white tracking-wide">
+                        <h3 className="text-sm font-serif font-semibold text-white tracking-wide">
                           {currentView.label}
-                        </h4>
+                        </h3>
                         <span className="text-[10px] tracking-wider uppercase text-accent font-semibold px-2 py-0.5 rounded bg-accent/15 border border-accent/30">
                           Premium Render
                         </span>

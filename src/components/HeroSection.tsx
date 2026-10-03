@@ -493,7 +493,7 @@ export default function HeroSection() {
           poster="/gallery/exterior-1.jpg"
           muted={isMuted}
           playsInline
-          preload="auto"
+          preload="metadata"
           onLoadedMetadata={handleMetadataLoaded}
           aria-label="Murad Buildings rezidensiyasi video sayohati"
           className="absolute inset-0 w-full h-full object-cover will-change-transform"
@@ -553,7 +553,7 @@ export default function HeroSection() {
             <button
               onClick={() => scrollToChapter(1)}
               className="min-h-[44px] flex flex-col items-center justify-center text-white/60 hover:text-white transition-colors group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-full p-2"
-              aria-label="Pastga aylantirib ko'rish"
+              aria-label="Skroll qilib o'rganing - pastga aylantirib ko'rish"
             >
               <span className="text-[10px] tracking-[0.25em] uppercase mb-1.5 group-hover:text-accent transition-colors font-medium">
                 Skroll qilib o&apos;rganing
@@ -582,9 +582,9 @@ export default function HeroSection() {
                 {HERO_CHAPTERS[activeChapterIndex].code}
               </span>
               <div className="text-left overflow-hidden">
-                <h4 className="text-white text-xs sm:text-sm font-medium tracking-wide truncate">
+                <h2 className="text-white text-xs sm:text-sm font-medium tracking-wide truncate">
                   {HERO_CHAPTERS[activeChapterIndex].title}
-                </h4>
+                </h2>
                 <p className="text-white/60 text-[11px] sm:text-xs truncate">
                   {HERO_CHAPTERS[activeChapterIndex].subtitle}
                 </p>

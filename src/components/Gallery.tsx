@@ -220,13 +220,14 @@ export default function Gallery() {
                       key={category}
                       type="button"
                       onClick={() => changeCategory(category)}
+                      aria-pressed={isActive}
                       className="group relative pb-3 text-xs uppercase tracking-[0.2em] transition-colors duration-300 whitespace-nowrap focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
                     >
                       <span
                         className={`transition-colors duration-300 ${
                           isActive
                             ? "text-[#F6F4F0] font-medium"
-                            : "text-[#666159] group-hover:text-[#A39E96]"
+                            : "text-[#9E988F] group-hover:text-[#F6F4F0]"
                         }`}
                       >
                         {category}
@@ -249,7 +250,7 @@ export default function Gallery() {
                 })}
               </nav>
 
-              <div className="hidden sm:flex items-center gap-2 font-mono text-[11px] text-[#666159] uppercase tracking-widest shrink-0">
+              <div className="hidden sm:flex items-center gap-2 font-mono text-[11px] text-[#9E988F] uppercase tracking-widest shrink-0">
                 <span className="text-[#A39E96]">
                   {String(filtered.length).padStart(2, "0")}
                 </span>
@@ -292,7 +293,6 @@ export default function Gallery() {
                         setLightboxIndex(index);
                       }
                     }}
-                    aria-label={`${image.title} — ${image.subtitle}. Kattalashtirish`}
                     className="cursor-pointer block focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
                   >
                     <div

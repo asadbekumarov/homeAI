@@ -3,9 +3,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState, useEffect } from "react";
-import { Phone, Mail, MapPin, Clock, Send, CheckCircle2, Globe } from "lucide-react";
-import ScrollReveal from "./ScrollReveal";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
+import { Phone, Mail, MapPin, Clock, Send, CheckCircle2, Globe, Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useProject } from "@/context/ProjectContext";
 
@@ -29,33 +29,15 @@ function InstagramIcon({ size = 15 }: { size?: number }) {
 }
 
 function formatUzbekPhone(value: string): string {
-  // Strip all non-digits
   let digits = value.replace(/\D/g, "");
-
-  // If user enters 998 prefix, remove it to work with remaining 9 digits
-  if (digits.startsWith("998")) {
-    digits = digits.slice(3);
-  }
-
-  // Max 9 digits (operator code + number)
+  if (digits.startsWith("998")) digits = digits.slice(3);
   digits = digits.slice(0, 9);
-
   if (digits.length === 0) return "";
-
   let result = "+998";
-  if (digits.length > 0) {
-    result += ` (${digits.slice(0, 2)}`;
-  }
-  if (digits.length >= 2) {
-    result += `) ${digits.slice(2, 5)}`;
-  }
-  if (digits.length >= 5) {
-    result += `-${digits.slice(5, 7)}`;
-  }
-  if (digits.length >= 7) {
-    result += `-${digits.slice(7, 9)}`;
-  }
-
+  if (digits.length > 0) result += ` (${digits.slice(0, 2)}`;
+  if (digits.length >= 2) result += `) ${digits.slice(2, 5)}`;
+  if (digits.length >= 5) result += `-${digits.slice(5, 7)}`;
+  if (digits.length >= 7) result += `-${digits.slice(7, 9)}`;
   return result;
 }
 
@@ -67,7 +49,6 @@ const contactSchema = z.object({
     .refine(
       (val) => {
         const digits = val.replace(/\D/g, "");
-        // Must have exactly 9 digits or 12 digits (with 998)
         return digits.length === 9 || (digits.startsWith("998") && digits.length === 12);
       },
       { message: "Telefon raqamini to'liq kiriting: +998 (XX) XXX-XX-XX" }
@@ -78,9 +59,63 @@ const contactSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactSchema>;
 
+// Animated input field component
+function FormField({
+  id,
+  label,
+  error,
+  children,
+  delay = 0,
+  isInView,
+}: {
+  id: string;
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+  delay?: number;
+  isInView: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-2"
+    >
+      <label
+        htmlFor={id}
+        className="block text-xs text-foreground-muted tracking-[0.15em] uppercase font-semibold"
+      >
+        {label}
+      </label>
+      {children}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -6, height: 0 }}
+            transition={{ duration: 0.2 }}
+            role="alert"
+            className="text-red-400 text-xs font-medium"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 export default function Contact() {
   const { currentProject } = useProject();
   const [submitted, setSubmitted] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef(null);
+  const infoRef = useRef(null);
+  const isFormInView = useInView(formRef, { once: true, margin: "-60px" });
+  const isInfoInView = useInView(infoRef, { once: true, margin: "-60px" });
+  const isTitleInView = useInView(sectionRef, { once: true, margin: "-80px" });
 
   const contactInfo = [
     {
@@ -98,7 +133,9 @@ export default function Contact() {
     {
       icon: MapPin,
       label: "Sotuv ofisi manzili",
-      value: currentProject?.address || "Toshkent sh., Yunusobod t., Katta halqa yo‘li bo‘yi",
+      value:
+        currentProject?.address ||
+        "Toshkent sh., Yunusobod t., Katta halqa yo'li bo'yi",
     },
     {
       icon: Clock,
@@ -109,9 +146,7 @@ export default function Contact() {
 
   useEffect(() => {
     if (!submitted) return;
-    const timer = setTimeout(() => {
-      setSubmitted(false);
-    }, 4000);
+    const timer = setTimeout(() => setSubmitted(false), 4000);
     return () => clearTimeout(timer);
   }, [submitted]);
 
@@ -128,217 +163,261 @@ export default function Contact() {
   const phoneRegistration = register("phone");
 
   const onSubmit = async () => {
-    // Simulate async submission
     await new Promise((resolve) => setTimeout(resolve, 800));
     setSubmitted(true);
     reset();
   };
 
-  return (
-    <section id="contact" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 xl:px-10 bg-background-dark">
-      <div className="mx-auto max-w-7xl">
-        <ScrollReveal>
-          <div className="flex items-center gap-4 mb-8">
-            <div className="h-px flex-1 max-w-16 bg-accent" />
-            <span className="text-xs tracking-[0.3em] uppercase text-accent font-medium">
-              Aloqa
-            </span>
-          </div>
-        </ScrollReveal>
+  const inputBase =
+    "w-full px-4 py-3.5 bg-card border rounded-xl text-foreground placeholder:text-foreground-dim/60 focus:outline-none transition-all duration-300 text-sm";
+  const inputNormal = "border-card-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(197,160,89,0.1)]";
+  const inputError = "border-red-400/60 focus:border-red-500 shadow-[0_0_0_3px_rgba(248,113,113,0.1)]";
 
-        <ScrollReveal delay={0.1}>
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground leading-tight mb-16">
-            Biz bilan <span className="text-accent">bog&apos;laning</span>
-          </h2>
-        </ScrollReveal>
+  return (
+    <section
+      id="contact"
+      ref={sectionRef}
+      className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 xl:px-10 bg-background-dark relative overflow-hidden"
+    >
+      {/* BG glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at 30% 50%, rgba(197,160,89,0.04) 0%, transparent 55%)",
+        }}
+      />
+
+      <div className="mx-auto max-w-7xl relative z-10">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={isTitleInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="flex items-center gap-4 mb-8"
+        >
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={isTitleInView ? { scaleX: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="h-px flex-1 max-w-16 bg-accent origin-left"
+          />
+          <span className="text-xs tracking-[0.3em] uppercase text-accent font-medium">
+            Aloqa
+          </span>
+        </motion.div>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          animate={isTitleInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground leading-tight mb-16"
+        >
+          Biz bilan{" "}
+          <span className="text-gradient-gold">bog&apos;laning</span>
+        </motion.h2>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Form */}
-          <ScrollReveal delay={0.2}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Name */}
-              <div className="space-y-2">
-                <label htmlFor="contact-name" className="block text-sm text-foreground-muted tracking-wide font-medium">
-                  Ismingiz
-                </label>
+          <div ref={formRef}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <FormField id="contact-name" label="Ismingiz" error={errors.name?.message} delay={0.1} isInView={isFormInView}>
                 <input
                   id="contact-name"
                   type="text"
+                  aria-invalid={errors.name ? "true" : "false"}
                   {...register("name")}
                   placeholder="To'liq ismingiz"
-                  className={cn(
-                    "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none transition-colors duration-200",
-                    errors.name
-                      ? "border-red-400 focus:border-red-500 ring-1 ring-red-400/30"
-                      : "border-card-border focus:border-accent"
-                  )}
+                  className={cn(inputBase, errors.name ? inputError : inputNormal)}
                 />
-                {errors.name && (
-                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.name.message}</p>
-                )}
-              </div>
+              </FormField>
 
-              {/* Phone */}
-              <div className="space-y-2">
-                <label htmlFor="contact-phone" className="block text-sm text-foreground-muted tracking-wide font-medium">
-                  Telefon
-                </label>
+              <FormField id="contact-phone" label="Telefon" error={errors.phone?.message} delay={0.17} isInView={isFormInView}>
                 <input
                   id="contact-phone"
                   type="tel"
+                  aria-invalid={errors.phone ? "true" : "false"}
                   {...phoneRegistration}
                   onChange={(e) => {
                     e.target.value = formatUzbekPhone(e.target.value);
                     phoneRegistration.onChange(e);
                   }}
                   placeholder="+998 (90) 123-45-67"
-                  className={cn(
-                    "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none transition-colors duration-200 font-mono text-sm",
-                    errors.phone
-                      ? "border-red-400 focus:border-red-500 ring-1 ring-red-400/30"
-                      : "border-card-border focus:border-accent"
-                  )}
+                  className={cn(inputBase, "font-mono", errors.phone ? inputError : inputNormal)}
                 />
-                {errors.phone && (
-                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone.message}</p>
-                )}
-              </div>
+              </FormField>
 
-              {/* Email */}
-              <div className="space-y-2">
-                <label htmlFor="contact-email" className="block text-sm text-foreground-muted tracking-wide font-medium">
-                  Email
-                </label>
+              <FormField id="contact-email" label="Email" error={errors.email?.message} delay={0.24} isInView={isFormInView}>
                 <input
                   id="contact-email"
                   type="email"
+                  aria-invalid={errors.email ? "true" : "false"}
                   {...register("email")}
                   placeholder="sizning@email.uz"
-                  className={cn(
-                    "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none transition-colors duration-200",
-                    errors.email
-                      ? "border-red-400 focus:border-red-500 ring-1 ring-red-400/30"
-                      : "border-card-border focus:border-accent"
-                  )}
+                  className={cn(inputBase, errors.email ? inputError : inputNormal)}
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.email.message}</p>
-                )}
-              </div>
+              </FormField>
 
-              {/* Message */}
-              <div className="space-y-2">
-                <label htmlFor="contact-message" className="block text-sm text-foreground-muted tracking-wide font-medium">
-                  Xabaringiz
-                </label>
+              <FormField id="contact-message" label="Xabaringiz" error={errors.message?.message} delay={0.31} isInView={isFormInView}>
                 <textarea
                   id="contact-message"
                   rows={4}
+                  aria-invalid={errors.message ? "true" : "false"}
                   {...register("message")}
                   placeholder="Qiziqtirgan savol yoki taklifingiz..."
-                  className={cn(
-                    "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-foreground-muted/40 focus:outline-none transition-colors duration-200 resize-none",
-                    errors.message
-                      ? "border-red-400 focus:border-red-500 ring-1 ring-red-400/30"
-                      : "border-card-border focus:border-accent"
-                  )}
+                  className={cn(inputBase, "resize-none", errors.message ? inputError : inputNormal)}
                 />
-                {errors.message && (
-                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.message.message}</p>
-                )}
-              </div>
+              </FormField>
 
-              {/* Submit */}
-              <div aria-live="polite" role="status">
-                <button
+              {/* Submit button */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={isFormInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.55, delay: 0.4 }}
+                aria-live="polite"
+                role="status"
+              >
+                <motion.button
                   type="submit"
                   disabled={isSubmitting || submitted}
-                  className="group flex items-center gap-3 px-8 py-3.5 bg-accent hover:bg-accent-light text-[#0A0908] font-bold rounded-xl transition-all duration-300 disabled:opacity-60 cursor-pointer shadow-lg shadow-accent/25 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                  whileHover={!isSubmitting && !submitted ? { scale: 1.03, y: -2 } : {}}
+                  whileTap={!isSubmitting && !submitted ? { scale: 0.97 } : {}}
+                  className="relative group flex items-center gap-3 px-8 py-3.5 bg-accent hover:bg-accent-light text-[#0A0908] font-bold rounded-xl transition-colors duration-300 disabled:opacity-60 cursor-pointer shadow-lg shadow-accent/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 overflow-hidden btn-shimmer"
                 >
-                  {submitted ? (
-                    <>
-                      <CheckCircle2 size={18} className="text-emerald-300" />
-                      <span className="text-sm tracking-wide font-medium">Yuborildi! Tez orada bog&apos;lanamiz</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-                      <span className="text-sm tracking-wide font-medium">
-                        {isSubmitting ? "Yuborilmoqda..." : "Yuborish"}
-                      </span>
-                    </>
-                  )}
-                </button>
-              </div>
+                  <AnimatePresence mode="wait" initial={false}>
+                    {submitted ? (
+                      <motion.span
+                        key="success"
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.7 }}
+                        className="flex items-center gap-2.5"
+                      >
+                        <CheckCircle2 size={18} className="text-emerald-700" />
+                        <span className="text-sm tracking-wide">Yuborildi! Tez orada bog&apos;lanamiz</span>
+                      </motion.span>
+                    ) : isSubmitting ? (
+                      <motion.span
+                        key="loading"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center gap-2.5"
+                      >
+                        <Loader2 size={18} className="animate-spin" />
+                        <span className="text-sm">Yuborilmoqda...</span>
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="idle"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center gap-2.5"
+                      >
+                        <Send size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                        <span className="text-sm tracking-wide font-medium">Yuborish</span>
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </motion.div>
             </form>
-          </ScrollReveal>
+          </div>
 
-          {/* Contact info */}
-          <ScrollReveal delay={0.3} direction="right">
-            <div className="space-y-8 lg:pl-8">
-              <p className="text-foreground-muted leading-relaxed">
-                Loyihamiz haqida batafsil ma&apos;lumot olish, xonadonlar narxi va
-                ko&apos;rish uchun biz bilan bog&apos;laning. Mutaxassislarimiz sizga
-                yordam berishdan xursand bo&apos;ladi.
-              </p>
+          {/* Info panel */}
+          <div ref={infoRef} className="space-y-8 lg:pl-8">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInfoInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-foreground-muted leading-relaxed"
+            >
+              Loyihamiz haqida batafsil ma&apos;lumot olish, xonadonlar narxi va
+              ko&apos;rish uchun biz bilan bog&apos;laning. Mutaxassislarimiz
+              sizga yordam berishdan xursand bo&apos;ladi.
+            </motion.p>
 
-              {/* Direct messengers and social links */}
-              <div className="flex flex-wrap gap-2.5">
-                <a
-                  href="https://t.me/XonSaroy"
+            {/* Social / messenger links */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={isInfoInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.55, delay: 0.18 }}
+              className="flex flex-wrap gap-2.5"
+            >
+              {[
+                {
+                  href: "https://t.me/XonSaroy",
+                  icon: <Send size={14} />,
+                  label: "Telegram",
+                  style: "bg-[#2AABEE]/15 hover:bg-[#2AABEE] text-[#2AABEE] hover:text-white border-[#2AABEE]/30",
+                },
+                {
+                  href: "https://www.instagram.com/xonsaroyuz/",
+                  icon: <InstagramIcon size={14} />,
+                  label: "Instagram",
+                  style: "bg-[#E1306C]/15 hover:bg-[#E1306C] text-[#E1306C] hover:text-white border-[#E1306C]/30",
+                },
+                {
+                  href: "https://xonsaroy.uz/",
+                  icon: <Globe size={14} />,
+                  label: "xonsaroy.uz",
+                  style: "bg-accent/15 hover:bg-accent text-accent hover:text-[#0C0B0A] border-accent/30",
+                },
+              ].map((btn, i) => (
+                <motion.a
+                  key={btn.label}
+                  href={btn.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-[#2AABEE]/15 hover:bg-[#2AABEE] text-[#2AABEE] hover:text-white border border-[#2AABEE]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.96 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={isInfoInView ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ delay: 0.25 + i * 0.08, duration: 0.4 }}
+                  className={`px-4 py-2.5 rounded-xl border text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2 ${btn.style}`}
                 >
-                  <Send size={15} />
-                  <span>Telegram (@XonSaroy)</span>
-                </a>
-                <a
-                  href="https://www.instagram.com/xonsaroyuz/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-[#E1306C]/15 hover:bg-[#E1306C] text-[#E1306C] hover:text-white border border-[#E1306C]/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
-                >
-                  <InstagramIcon size={15} />
-                  <span>Instagram (@xonsaroyuz)</span>
-                </a>
-                <a
-                  href="https://xonsaroy.uz/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-accent/15 hover:bg-accent text-accent hover:text-[#0C0B0A] border border-accent/30 text-xs font-semibold tracking-wider transition-all duration-300 flex items-center gap-2"
-                >
-                  <Globe size={15} />
-                  <span>xonsaroy.uz</span>
-                </a>
-              </div>
+                  {btn.icon}
+                  <span>{btn.label}</span>
+                </motion.a>
+              ))}
+            </motion.div>
 
-              <div className="space-y-4 pt-4 border-t border-divider">
-                {contactInfo.map((info) => (
-                  <div key={info.label} className="flex items-start gap-4 p-4 rounded-xl bg-card border border-card-border/60 hover:border-accent/40 transition-all">
-                    <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent flex-shrink-0">
-                      <info.icon size={18} />
-                    </div>
-                    <div>
-                      <p className="text-foreground text-xs uppercase tracking-widest font-semibold mb-1 text-accent">
-                        {info.label}
-                      </p>
-                      {info.href ? (
-                        <a
-                          href={info.href}
-                          className="text-foreground text-sm font-medium hover:text-accent transition-colors"
-                        >
-                          {info.value}
-                        </a>
-                      ) : (
-                        <p className="text-foreground text-sm font-medium">{info.value}</p>
-                      )}
-                    </div>
+            {/* Contact info cards */}
+            <div className="space-y-3 pt-2 border-t border-divider">
+              {contactInfo.map((info, i) => (
+                <motion.div
+                  key={info.label}
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={isInfoInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.5, delay: 0.3 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ x: 4 }}
+                  className="flex items-start gap-4 p-4 rounded-xl bg-card border border-card-border/60 hover:border-accent/35 hover:shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] transition-all duration-300 cursor-default"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                    className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent flex-shrink-0"
+                  >
+                    <info.icon size={18} />
+                  </motion.div>
+                  <div>
+                    <p className="text-accent text-[10px] uppercase tracking-widest font-bold mb-0.5">
+                      {info.label}
+                    </p>
+                    {info.href ? (
+                      <a
+                        href={info.href}
+                        className="text-foreground text-sm font-medium hover:text-accent transition-colors"
+                      >
+                        {info.value}
+                      </a>
+                    ) : (
+                      <p className="text-foreground text-sm font-medium">{info.value}</p>
+                    )}
                   </div>
-                ))}
-              </div>
+                </motion.div>
+              ))}
             </div>
-          </ScrollReveal>
+          </div>
         </div>
       </div>
     </section>

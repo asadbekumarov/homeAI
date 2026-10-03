@@ -214,9 +214,9 @@ export default function BuildingExplorer({
               <Sparkles size={16} />
             </div>
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-accent mb-1">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-accent mb-1">
                 10 xildan ortiq rejaviy yechimlar
-              </h4>
+              </h3>
               <p className="text-xs text-foreground-muted leading-relaxed">
                 <strong className="text-foreground font-medium">1 xonali:</strong> 35–48 m² ·{" "}
                 <strong className="text-foreground font-medium">2 xonali:</strong> 54–72 m² ·{" "}
@@ -231,9 +231,9 @@ export default function BuildingExplorer({
               <DollarSign size={16} />
             </div>
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">
                 Qulay to&apos;lov va muddatli to&apos;lov (Rassrochka)
-              </h4>
+              </h3>
               <p className="text-xs text-foreground-muted leading-relaxed">
                 100% to‘lovda maxsus chegirmalar. 30% yoki 50% boshlang‘ich to‘lov bilan uylar topshirilgunga qadar (18 oydan 36 oygacha) 0% foizsiz muddatli to‘lov.
               </p>
@@ -265,13 +265,15 @@ export default function BuildingExplorer({
                 return (
                   <button
                     key={floor.floorNumber}
+                    type="button"
                     onClick={() => {
                       setSelectedFloorNumber(floor.floorNumber);
                       setSelectedApartment(null);
                     }}
+                    aria-pressed={isSelected}
                     className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-left ${
                       isSelected
-                        ? "bg-accent text-white shadow-md shadow-accent/20"
+                        ? "bg-accent text-[#0C0B0A] font-semibold shadow-md shadow-accent/20"
                         : "hover:bg-background-dark text-foreground border border-transparent hover:border-divider"
                     }`}
                   >
@@ -279,7 +281,7 @@ export default function BuildingExplorer({
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center font-serif text-sm font-semibold ${
                           isSelected
-                            ? "bg-white/20 text-white"
+                            ? "bg-black/25 text-[#0C0B0A]"
                             : "bg-background-dark text-foreground-muted"
                         }`}
                       >
@@ -292,7 +294,7 @@ export default function BuildingExplorer({
                             <span
                               className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded font-mono uppercase ${
                                 isSelected
-                                  ? "bg-white/20 text-white"
+                                  ? "bg-black/30 text-white font-bold"
                                   : "bg-accent/15 text-accent"
                               }`}
                             >
@@ -302,7 +304,7 @@ export default function BuildingExplorer({
                         </div>
                         <div
                           className={`text-xs ${
-                            isSelected ? "text-white/80" : "text-foreground-muted"
+                            isSelected ? "text-[#0C0B0A]/85 font-medium" : "text-foreground-muted"
                           }`}
                         >
                           {floor.apartments.length} ta xonadon
@@ -315,7 +317,7 @@ export default function BuildingExplorer({
                         <span
                           className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
                             isSelected
-                              ? "bg-white/20 text-white"
+                              ? "bg-black/80 text-white font-semibold"
                               : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
                           }`}
                         >
@@ -325,7 +327,7 @@ export default function BuildingExplorer({
                         <span
                           className={`text-[11px] px-2 py-0.5 rounded-full ${
                             isSelected
-                              ? "bg-white/10 text-white/70"
+                              ? "bg-black/50 text-white"
                               : "bg-white/5 text-stone-400 border border-white/5"
                           }`}
                         >
@@ -379,9 +381,11 @@ export default function BuildingExplorer({
               {/* Filters */}
               <div className="flex flex-wrap items-center gap-2">
                 {/* Rooms Filter */}
-                <div className="flex items-center bg-background-dark rounded-xl p-1 border border-divider/60">
+                <div className="flex items-center bg-background-dark rounded-xl p-1 border border-divider/60" role="group" aria-label="Xonalar soni bo'yicha filtr">
                   <button
+                    type="button"
                     onClick={() => setRoomFilter("all")}
+                    aria-pressed={roomFilter === "all"}
                     className={`px-2.5 py-1 text-xs rounded-lg transition-colors font-medium ${
                       roomFilter === "all"
                         ? "bg-card text-foreground shadow-xs"
@@ -393,7 +397,9 @@ export default function BuildingExplorer({
                   {[1, 2, 3, 4].map((rooms) => (
                     <button
                       key={rooms}
+                      type="button"
                       onClick={() => setRoomFilter(rooms)}
+                      aria-pressed={roomFilter === rooms}
                       className={`px-2.5 py-1 text-xs rounded-lg transition-colors font-medium ${
                         roomFilter === rooms
                           ? "bg-card text-foreground shadow-xs"
@@ -411,6 +417,7 @@ export default function BuildingExplorer({
                   onChange={(e) =>
                     setStatusFilter(e.target.value as ApartmentStatus | "all")
                   }
+                  aria-label="Kvartiralar holati bo'yicha saralash"
                   className="bg-background-dark text-foreground text-xs rounded-xl px-3 py-1.5 border border-divider/60 focus:outline-none focus:border-accent"
                 >
                   <option value="all">Barcha holatlar</option>
@@ -643,9 +650,9 @@ export default function BuildingExplorer({
                 {/* Features & Advantages */}
                 {selectedApartment.features && selectedApartment.features.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted mb-3">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted mb-3">
                       Xonadonning afzalliklari:
-                    </h4>
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedApartment.features.map((feature, idx) => (
                         <span

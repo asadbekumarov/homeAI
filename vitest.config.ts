@@ -8,6 +8,18 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json-summary"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.{ts,tsx}",
+        "src/**/*.d.ts",
+        "src/app/layout.tsx",
+        "src/components/BuildingScene.tsx",
+        "src/components/Hero.tsx",
+      ],
+    },
   },
   resolve: {
     alias: {
